@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -10,7 +11,8 @@ using SyncLed.Avalonia.Services;
 namespace SyncLed.Avalonia.ViewModels;
 
 public sealed record DiagnosticRow(string Name, string Transport, string Status,
-    string Monitor, string Mode, string Sent, string Skipped, string Traffic, string Errors);
+    string Monitor, string Mode, string Sent, string Skipped, string Traffic, string Errors,
+    double SkippedShare, string SkippedTip);
 
 /// <summary>Главное состояние Avalonia-приложения.</summary>
 public sealed class MainWindowViewModel : ViewModelBase
@@ -52,6 +54,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isPresetModified;
     private string _newPresetName = "";
     private string _presetStatus = "";
+    private string _refreshStatusText = "";
+    private bool _isSidebarCompact;
+    private string _updateStatus = "Проверка обновлений…";
+    private string _latestUpdateUrl = UpdateChecker.ReleasesPage;
 
     public MainWindowViewModel(AppConfig config, bool startMinimized)
     {
@@ -82,12 +88,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         ProbeCompatible = config.ProbeCompatibleDevices;
         ScanBluetooth = config.ScanBluetooth;
 
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync);
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => !IsRefreshing);
         SyncCommand = new AsyncRelayCommand(ToggleSyncAsync, () => !_isRefreshing);
 
         ApplyPresetCommand = new RelayCommand(ApplySelectedPreset, () => SelectedPreset != null);
         SavePresetCommand = new RelayCommand(() => SavePreset(null));
         DeletePresetCommand = new RelayCommand(DeleteSelectedPreset, () => SelectedPreset != null);
+        CheckUpdateCommand = new RelayCommand(() => _ = CheckForUpdatesAsync(true));
+        OpenReleasesCommand = new RelayCommand(OpenReleasesPage);
         RefreshPresets();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
@@ -98,6 +106,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
 
         AppendLog("SyncLed запущен. Avalonia UI.");
+
+        // Проверка обновлений в фоне: молчаливо, тост — только если вышла новая версия.
+        Dispatcher.UIThread.Post(async () => await CheckForUpdatesAsync(false));
         if (!startMinimized) Dispatcher.UIThread.Post(async () => await InitializeAsync());
     }
 
@@ -130,6 +141,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public AsyncRelayCommand RefreshCommand { get; }
     public AsyncRelayCommand SyncCommand { get; }
+    public RelayCommand CheckUpdateCommand { get; }
+    public RelayCommand OpenReleasesCommand { get; }
 
     public bool IsSyncing
     {
@@ -154,6 +167,52 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public string SyncButtonText => IsSyncing ? "Стоп" : "Старт";
+
+    // ── уведомления, статус поиска, компактная панель, обновления ─────────
+
+    /// <summary>Всплывающие уведомления в правом нижнем углу окна.</summary>
+    public ObservableCollection<ToastItem> Toasts { get; } = new();
+
+    /// <summary>Строка состояния поиска рядом с кнопкой «Обновить».</summary>
+    public string RefreshStatusText
+    {
+        get => _refreshStatusText;
+        private set => SetProperty(ref _refreshStatusText, value);
+    }
+
+    /// <summary>Версия приложения из манифеста, например «1.0.0».</summary>
+    public string VersionText { get; } = ReadVersion();
+
+    /// <summary>Подпись версии для подвала боковой панели.</summary>
+    public string VersionLabel => "v" + VersionText;
+
+    /// <summary>Узкое окно: боковая панель сворачивается в колонку иконок.</summary>
+    public bool IsSidebarCompact
+    {
+        get => _isSidebarCompact;
+        set
+        {
+            if (!SetProperty(ref _isSidebarCompact, value)) return;
+            OnPropertyChanged(nameof(SidebarWidth));
+        }
+    }
+
+    /// <summary>Ширина боковой панели: обычная (218) или компактная (70).</summary>
+    public double SidebarWidth => _isSidebarCompact ? 70 : 218;
+
+    /// <summary>Статус проверки обновлений (раздел «Обновления» в настройках).</summary>
+    public string UpdateStatus
+    {
+        get => _updateStatus;
+        private set => SetProperty(ref _updateStatus, value);
+    }
+
+    /// <summary>Ссылка на последний доступный релиз.</summary>
+    public string LatestUpdateUrl
+    {
+        get => _latestUpdateUrl;
+        private set => SetProperty(ref _latestUpdateUrl, value);
+    }
 
     public string StateText
     {
@@ -371,7 +430,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         RefreshPresets();
         SelectPresetByName(preset.Name);
         PresetStatus = $"Пресет «{preset.Name}» применён.";
+        ShowToast($"Пресет «{preset.Name}» применён", "success");
     }
+
+    /// <summary>Применение пресета из чипсов на странице «Устройства».</summary>
+    public void ApplyPresetDirect(PresetItem item) => ApplyPreset(item.Preset);
 
     /// <summary>
     /// Снимок текущих общих настроек под указанным именем; пресет с таким же
@@ -406,6 +469,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectPresetByName(preset.Name);
         NewPresetName = preset.Name;
         PresetStatus = $"Сохранено: «{preset.Name}».";
+        ShowToast($"Пресет «{preset.Name}» сохранён", "success");
         return preset;
     }
 
@@ -417,7 +481,10 @@ public sealed class MainWindowViewModel : ViewModelBase
                          string.Equals(p.Name, preset.Name, StringComparison.OrdinalIgnoreCase))
                      ?? preset;
         if (_services.Config.Presets.Remove(target))
+        {
             PresetStatus = $"Пресет «{target.Name}» удалён.";
+            ShowToast($"Пресет «{target.Name}» удалён");
+        }
         else
             PresetStatus = "Пресет не найден.";
 
@@ -517,6 +584,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (IsRefreshing) return;
         IsRefreshing = true;
         StateText = "Поиск устройств";
+        RefreshStatusText = "Ищем ленты…";
         try
         {
             await _services.RefreshAsync();
@@ -530,10 +598,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             AppendLog("Поиск устройств: " + ex.Message);
+            ShowToast("Ошибка поиска устройств", "error");
         }
         finally
         {
             IsRefreshing = false;
+            RefreshStatusText = Devices.Count > 0
+                ? $"Найдено лент: {Devices.Count}"
+                : "Ленты не найдены";
+            StateText = IsSyncing ? "Синхронизация включена" : "Синхронизация выключена";
         }
     }
 
@@ -698,6 +771,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _services.ResetDiagnostics();
         RefreshDiagnostics();
         AppendLog("Счётчики диагностики сброшены.");
+        ShowToast("Счётчики диагностики сброшены");
     }
 
     private void RefreshDiagnostics()
@@ -716,7 +790,9 @@ public sealed class MainWindowViewModel : ViewModelBase
             s.Stats.Sent.ToString(),
             s.Stats.Skipped.ToString(),
             FormatTraffic(s.Stats.Bytes),
-            s.Stats.Errors.ToString()));
+            s.Stats.Errors.ToString(),
+            SkippedShareOf(s.Stats),
+            SkippedTipOf(s.Stats)));
 
         DiagnosticRows.Clear();
         foreach (var row in rows) DiagnosticRows.Add(row);
@@ -726,6 +802,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         if (bytes < 1024) return $"{bytes} Б";
         return $"{bytes / 1024.0:0.0} КБ";
+    }
+
+    /// <summary>Доля пропущенных кадров от всех отправленных: 0…1.</summary>
+    private static double SkippedShareOf(StripStats stats)
+    {
+        long total = stats.Sent + stats.Skipped;
+        return total <= 0 ? 0 : (double)stats.Skipped / total;
+    }
+
+    /// <summary>Подсказка к счётчику «Проп.»: сколько кадров и почему потеряно.</summary>
+    private static string SkippedTipOf(StripStats stats)
+    {
+        long total = stats.Sent + stats.Skipped;
+        if (total <= 0) return "Кадров пока не отправлялось";
+        return $"Пропущено {stats.Skipped:N0} из {total:N0} кадров ({SkippedShareOf(stats):P1}) — предел трафика контроллера";
     }
 
     private void RefreshBindings()
@@ -754,6 +845,88 @@ public sealed class MainWindowViewModel : ViewModelBase
         lines.Add($"{DateTime.Now:HH:mm:ss}  {message}");
         while (lines.Count > 200) lines.RemoveAt(0);
         LogText = string.Join('\n', lines);
+    }
+
+    /// <summary>
+    /// Показывает всплывающее уведомление в правом нижнем углу окна;
+    /// само скрывается примерно через 3 секунды.
+    /// </summary>
+    public void ShowToast(string message, string tone = "info")
+    {
+        var toast = new ToastItem(message, tone);
+        Toasts.Add(toast);
+
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(3000) };
+        void Hide(object? sender, EventArgs args)
+        {
+            timer.Stop();
+            timer.Tick -= Hide;
+            Toasts.Remove(toast);
+        }
+        timer.Tick += Hide;
+        timer.Start();
+    }
+
+    // ── обновления через GitHub Releases ──────────────────────────────────
+
+    /// <summary>
+    /// Проверяет GitHub Releases: при новой версии показывает тост и ссылку
+    /// в настройках. В тихом режиме (<paramref name="interactive"/> = false)
+    /// при ошибке просто пишет в журнал, чтобы не беспокоить при старте.
+    /// </summary>
+    public async Task CheckForUpdatesAsync(bool interactive)
+    {
+        if (interactive) UpdateStatus = "Проверяем обновления…";
+
+        var result = await UpdateChecker.CheckAsync(VersionText);
+
+        if (!result.Success)
+        {
+            if (interactive)
+            {
+                UpdateStatus = "Проверка недоступна: " + result.Error;
+                ShowToast(UpdateStatus, "error");
+            }
+            else
+            {
+                UpdateStatus = "Обновления проверить не удалось: " + result.Error;
+                AppendLog("Обновления: " + result.Error);
+            }
+            return;
+        }
+
+        if (result.Latest == null)
+        {
+            UpdateStatus = $"Актуальная версия {VersionText} — обновлений нет";
+            if (interactive) ShowToast(UpdateStatus, "success");
+            return;
+        }
+
+        LatestUpdateUrl = result.Url ?? UpdateChecker.ReleasesPage;
+        UpdateStatus = $"Доступна версия {result.Latest}";
+        ShowToast($"Доступна версия {result.Latest} — раздел «Обновления» в настройках", "success");
+        AppendLog($"Обновление: доступна версия {result.Latest}.");
+    }
+
+    /// <summary>Открывает страницу релизов в браузере.</summary>
+    private void OpenReleasesPage()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(LatestUpdateUrl) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            AppendLog("Открытие страницы релизов: " + ex.Message);
+            ShowToast("Не удалось открыть страницу релизов", "error");
+        }
+    }
+
+    /// <summary>Версия из манифеста вида «1.0.0».</summary>
+    private static string ReadVersion()
+    {
+        var version = typeof(MainWindowViewModel).Assembly.GetName().Version;
+        return version == null ? "0.0.0" : $"{version.Major}.{version.Minor}.{version.Build}";
     }
 
     private void SetSetting<T>(ref T field, T value, Action<T> assign, T min, T max,

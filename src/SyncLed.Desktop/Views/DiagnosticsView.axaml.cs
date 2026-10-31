@@ -57,6 +57,22 @@ public sealed class ErrorsToBrushConverter : IValueConverter
         throw new NotSupportedException();
 }
 
+/// <summary>
+/// Цвет счётчика пропусков: янтарный, когда потеряно 5% и более кадров,
+/// приглушённый — при малых значениях. Доля приходит из <see cref="DiagnosticRow.SkippedShare"/>.
+/// </summary>
+public sealed class SkippedToBrushConverter : IValueConverter
+{
+    private static readonly IBrush Warn = new SolidColorBrush(Color.Parse("#F6BC60"));
+    private static readonly IBrush Muted = new SolidColorBrush(Color.Parse("#8490A4"));
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is double share && share >= 0.05 ? Warn : Muted;
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 /// <summary>Сводка движка, таблица лент и копирование отчёта в буфер обмена.</summary>
 public sealed partial class DiagnosticsView : UserControl
 {
@@ -118,10 +134,12 @@ public sealed partial class DiagnosticsView : UserControl
         try
         {
             await clipboard.SetTextAsync(report.ToString());
+            viewModel.ShowToast("Отчёт скопирован в буфер обмена", "success");
         }
         catch
         {
             // буфер обмена может быть недоступен — не мешаем работе приложения
+            viewModel.ShowToast("Буфер обмена недоступен", "error");
         }
     }
 }

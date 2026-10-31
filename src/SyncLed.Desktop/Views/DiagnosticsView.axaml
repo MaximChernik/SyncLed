@@ -5,6 +5,7 @@
   <UserControl.Resources>
     <views:StatusToBrushConverter x:Key="StatusBrush"/>
     <views:ErrorsToBrushConverter x:Key="ErrorsBrush"/>
+    <views:SkippedToBrushConverter x:Key="SkippedBrush"/>
   </UserControl.Resources>
   <UserControl.Styles>
     <!-- Заголовок таблицы: приглушённый, с разрядкой. -->
@@ -107,7 +108,9 @@
                              HorizontalAlignment="Right" />
                   <TextBlock Grid.Column="6"
                              Text="{Binding Skipped}"
-                             Foreground="{StaticResource Brush.Muted}"
+                             ToolTip.Tip="{Binding SkippedTip}"
+                             Foreground="{Binding SkippedShare, Converter={StaticResource SkippedBrush}}"
+                             FontWeight="SemiBold"
                              HorizontalAlignment="Right" />
                   <TextBlock Grid.Column="7"
                              Text="{Binding Traffic}"

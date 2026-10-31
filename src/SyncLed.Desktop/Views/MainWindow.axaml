@@ -7,7 +7,7 @@
         Title="SyncLed"
         Width="1360"
         Height="860"
-        MinWidth="1120"
+        MinWidth="900"
         MinHeight="720"
         Background="#090B10"
         SystemDecorations="None"
@@ -90,6 +90,83 @@
       <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
       <Setter Property="HorizontalAlignment" Value="Center"/>
     </Style>
+
+    <!-- Быстрые пресеты в шапке страницы «Устройства». -->
+    <Style Selector="Button.chip">
+      <Setter Property="Background" Value="#151B29"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="14"/>
+      <Setter Property="Padding" Value="13,5"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="MinHeight" Value="28"/>
+    </Style>
+    <Style Selector="Button.chip:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#1D2534"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    </Style>
+    <Style Selector="Button.chip.active">
+      <Setter Property="Background" Value="#21314B"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- Всплывающие уведомления в правом нижнем углу. -->
+    <Style Selector="Border.toast">
+      <Setter Property="Background" Value="#161D2C"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Padding" Value="16,11"/>
+      <Setter Property="Margin" Value="0,0,0,8"/>
+      <Setter Property="MaxWidth" Value="430"/>
+      <Setter Property="BoxShadow" Value="0 8 24 0 #66000000"/>
+    </Style>
+    <Style Selector="Border.toast TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style Selector="Border.toast.success">
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.Good}"/>
+    </Style>
+    <Style Selector="Border.toast.success TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    </Style>
+    <Style Selector="Border.toast.error">
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.Bad}"/>
+    </Style>
+    <Style Selector="Border.toast.error TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+    </Style>
+
+    <!-- Компактная боковая панель (узкое окно): колонка иконок без подписей. -->
+    <Style Selector="Border.sidebar.compact">
+      <Setter Property="Padding" Value="13,20,13,12"/>
+    </Style>
+    <Style Selector="Border.sidebar.compact Button.nav">
+      <Setter Property="Width" Value="44"/>
+      <Setter Property="MinWidth" Value="44"/>
+      <Setter Property="MaxWidth" Value="44"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Border.sidebar.compact TextBlock.navLabel">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="Border.sidebar.compact Grid.brandBlock">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="Border.sidebar.compact TextBlock.navCaption">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="Border.sidebar.compact TextBlock.footerNote">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
   </Window.Styles>
 
   <Grid RowDefinitions="40,*">
@@ -97,21 +174,26 @@
     <!-- ── заголовочная панель окна (перетаскивание, свернуть/развернуть/закрыть) ── -->
     <views:WindowChrome Grid.Row="0" Title="SyncLed"/>
 
-    <Grid Grid.Row="1" ColumnDefinitions="218,*">
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
 
     <!-- ── лёгкий анимированный фон (тёмный фиолетово-циановый градиент) ────
          Позади непрозрачной боковой панели и карточек; ввод не перехватывает. -->
     <views:AnimatedGradientBackground Grid.Column="0" Grid.ColumnSpan="2" ZIndex="-1"/>
 
     <!-- ── боковая панель ─────────────────────────────────────────────── -->
+    <!-- Ширина привязана к SidebarWidth: при узком окне панель сворачивается
+         в колонку иконок (класс compact скрывает подписи). -->
     <Border Grid.Column="0"
+            Classes="sidebar"
+            Classes.compact="{Binding IsSidebarCompact}"
+            Width="{Binding SidebarWidth}"
             Background="{StaticResource Brush.Sidebar}"
             BorderBrush="{StaticResource Brush.BorderSoft}"
             BorderThickness="0,0,1,0"
             Padding="16,20,16,12">
       <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
 
-        <Grid Grid.Row="0" ColumnDefinitions="42,10,*" Height="42">
+        <Grid Grid.Row="0" Classes="brandBlock" ColumnDefinitions="42,10,*" Height="42">
           <Border Grid.Column="0"
                   Width="42" Height="42"
                   CornerRadius="12"
@@ -139,55 +221,57 @@
           </StackPanel>
         </Grid>
 
-        <TextBlock Grid.Row="1" Text="ПРИЛОЖЕНИЕ" Classes="caption" Margin="4,24,0,10"/>
+        <TextBlock Grid.Row="1" Text="ПРИЛОЖЕНИЕ" Classes="caption navCaption" Margin="4,24,0,10"/>
 
         <StackPanel Grid.Row="2" Spacing="4">
           <Button Classes="nav" Classes.accent="{Binding IsDevicesPage}"
-                  Width="184" Height="42" HorizontalAlignment="Stretch"
-                  Tag="devices" Click="OnNavClick">
+                  Height="42" HorizontalAlignment="Stretch"
+                  Tag="devices" Click="OnNavClick" ToolTip.Tip="Устройства">
             <StackPanel Orientation="Horizontal" Spacing="11">
               <TextBlock Text="▦" Classes="navIcon"/>
-              <TextBlock Text="Устройства" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="Устройства" Classes="navLabel" FontSize="13" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Classes="nav" Classes.accent="{Binding IsGroupsPage}"
-                  Width="184" Height="42" HorizontalAlignment="Stretch"
-                  Tag="groups" Click="OnNavClick">
+                  Height="42" HorizontalAlignment="Stretch"
+                  Tag="groups" Click="OnNavClick" ToolTip.Tip="Группы">
             <StackPanel Orientation="Horizontal" Spacing="11">
               <TextBlock Text="⊞" Classes="navIcon"/>
-              <TextBlock Text="Группы" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="Группы" Classes="navLabel" FontSize="13" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Classes="nav" Classes.accent="{Binding IsDiagnosticsPage}"
-                  Width="184" Height="42" HorizontalAlignment="Stretch"
-                  Tag="diagnostics" Click="OnNavClick">
+                  Height="42" HorizontalAlignment="Stretch"
+                  Tag="diagnostics" Click="OnNavClick" ToolTip.Tip="Диагностика">
             <StackPanel Orientation="Horizontal" Spacing="11">
               <TextBlock Text="◧" Classes="navIcon"/>
-              <TextBlock Text="Диагностика" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="Диагностика" Classes="navLabel" FontSize="13" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Classes="nav" Classes.accent="{Binding IsSettingsPage}"
-                  Width="184" Height="42" HorizontalAlignment="Stretch"
-                  Tag="settings" Click="OnNavClick">
+                  Height="42" HorizontalAlignment="Stretch"
+                  Tag="settings" Click="OnNavClick" ToolTip.Tip="Настройки">
             <StackPanel Orientation="Horizontal" Spacing="11">
               <TextBlock Text="⚙" Classes="navIcon"/>
-              <TextBlock Text="Настройки" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="Настройки" Classes="navLabel" FontSize="13" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Classes="nav" Classes.accent="{Binding IsLogPage}"
-                  Width="184" Height="42" HorizontalAlignment="Stretch"
-                  Tag="log" Click="OnNavClick">
+                  Height="42" HorizontalAlignment="Stretch"
+                  Tag="log" Click="OnNavClick" ToolTip.Tip="Журнал">
             <StackPanel Orientation="Horizontal" Spacing="11">
               <TextBlock Text="≡" Classes="navIcon"/>
-              <TextBlock Text="Журнал" FontSize="13" VerticalAlignment="Center"/>
+              <TextBlock Text="Журнал" Classes="navLabel" FontSize="13" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
         </StackPanel>
 
-        <TextBlock Grid.Row="4"
-                   Text="СВЕТ · ЦВЕТ · АТМОСФЕРА"
-                   Classes="footerNote"
-                   Margin="0,12,0,0"/>
+        <StackPanel Grid.Row="4" Spacing="3">
+          <TextBlock Text="СВЕТ · ЦВЕТ · АТМОСФЕРА"
+                     Classes="footerNote"
+                     Margin="0,12,0,0"/>
+          <TextBlock Text="{Binding VersionLabel}" Classes="footerNote"/>
+        </StackPanel>
       </Grid>
     </Border>
 
@@ -199,6 +283,33 @@
           <TextBlock Text="ПАНЕЛЬ УПРАВЛЕНИЯ" Classes="eyebrow"/>
           <TextBlock x:Name="PageTitle" Text="Устройства" Classes="h1" Margin="0,2,0,0"/>
           <TextBlock Text="{Binding Subtitle}" Classes="subtitle"/>
+
+          <!-- Быстрые пресеты: применение общих настроек в один клик. -->
+          <ItemsControl ItemsSource="{Binding Presets}"
+                        IsVisible="{Binding IsDevicesPage}"
+                        Margin="0,11,0,0"
+                        VerticalAlignment="Top">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="8"/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Classes="chip" Classes.active="{Binding IsActive}"
+                        Click="OnPresetChipClick"
+                        ToolTip.Tip="Применить этот пресет к общим настройкам">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="✓"
+                               IsVisible="{Binding IsActive}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -208,10 +319,29 @@
               <TextBlock Text="{Binding StateText}" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
+          <TextBlock Text="{Binding RefreshStatusText}"
+                     Foreground="{StaticResource Brush.Muted}"
+                     FontSize="12"
+                     VerticalAlignment="Center"/>
           <Button Classes="ghost"
-                  Content="Обновить"
                   Command="{Binding RefreshCommand}"
-                  ToolTip.Tip="Поиск устройств"/>
+                  ToolTip.Tip="Поиск устройств">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <!-- Кольцевой индикатор поиска: вращается, пока идёт обновление.
+                   Avalonia 11.2 не поставляет ProgressRing — рисуем дугу сами. -->
+              <Path x:Name="SearchSpinner"
+                    Width="13" Height="13"
+                    Stretch="Uniform"
+                    IsVisible="{Binding IsRefreshing}"
+                    VerticalAlignment="Center"
+                    RenderTransformOrigin="50%,50%"
+                    Data="M6.5,1 A5.5,5.5 0 1 1 1.74,3.75"
+                    Stroke="{StaticResource Brush.Accent2}"
+                    StrokeThickness="1.8"
+                    StrokeLineCap="Round"/>
+              <TextBlock Text="Обновить" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
           <Button Classes="primary"
                   Content="{Binding SyncButtonText}"
                   Command="{Binding SyncCommand}"
@@ -226,7 +356,7 @@
         <!-- Устройства: прокрутка от шапки до низа клиентской области;
              нижний отступ задаёт Margin контента, поэтому он гарантированно
              попадает в extent и последний ряд не обрезается. -->
-        <Grid IsVisible="{Binding IsDevicesPage}">
+        <Grid x:Name="PageDevices" IsVisible="{Binding IsDevicesPage}">
           <ScrollViewer x:Name="DevicesScroller"
                         Padding="0"
                         HorizontalAlignment="Stretch"
@@ -268,19 +398,38 @@
         </Grid>
 
         <!-- Группы -->
-        <views:GroupsView IsVisible="{Binding IsGroupsPage}"/>
+        <views:GroupsView x:Name="PageGroups" IsVisible="{Binding IsGroupsPage}"/>
 
         <!-- Диагностика -->
-        <views:DiagnosticsView IsVisible="{Binding IsDiagnosticsPage}"/>
+        <views:DiagnosticsView x:Name="PageDiagnostics" IsVisible="{Binding IsDiagnosticsPage}"/>
 
         <!-- Настройки -->
-        <views:SettingsView IsVisible="{Binding IsSettingsPage}"/>
+        <views:SettingsView x:Name="PageSettings" IsVisible="{Binding IsSettingsPage}"/>
 
         <!-- Журнал -->
-        <views:LogView IsVisible="{Binding IsLogPage}"/>
+        <views:LogView x:Name="PageLog" IsVisible="{Binding IsLogPage}"/>
 
       </Grid>
     </Grid>
+
+    <!-- ── всплывающие уведомления (правый нижний угол контентной области) ── -->
+    <ItemsControl Grid.Row="1" Grid.Column="1"
+                  ItemsSource="{Binding Toasts}"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="0,0,26,26"
+                  ZIndex="950"
+                  IsHitTestVisible="False">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border Classes="toast"
+                  Classes.success="{Binding IsSuccess}"
+                  Classes.error="{Binding IsError}">
+            <TextBlock Text="{Binding Message}"/>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
     </Grid>
 
     <!-- ── зоны изменения размера окна (SystemDecorations="None") ─────────── -->

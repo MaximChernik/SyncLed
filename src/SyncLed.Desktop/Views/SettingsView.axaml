@@ -324,6 +324,42 @@
 
         <Border Height="1" Background="{StaticResource Brush.BorderSoft}" Margin="0,14" />
 
+        <TextBlock Text="Обновления"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Brush.Text}"
+                   Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="250,*" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Версия приложения" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1"
+                     Text="{Binding VersionLabel}"
+                     Foreground="{StaticResource Brush.Text}"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Проверка обновлений" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+            <Button Classes="ghost"
+                    Content="Проверить"
+                    Command="{Binding CheckUpdateCommand}"
+                    ToolTip.Tip="Запросить GitHub Releases: есть ли новая версия" />
+            <Button Classes="ghost"
+                    Content="Страница релизов"
+                    Command="{Binding OpenReleasesCommand}"
+                    ToolTip.Tip="Открыть страницу релизов в браузере" />
+          </StackPanel>
+        </Grid>
+
+        <TextBlock Text="{Binding UpdateStatus}"
+                   Foreground="{StaticResource Brush.Muted}"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   Margin="0,6,0,0" />
+
+        <Border Height="1" Background="{StaticResource Brush.BorderSoft}" Margin="0,14" />
+
         <TextBlock Text="Поиск устройств"
                    FontSize="16"
                    FontWeight="SemiBold"

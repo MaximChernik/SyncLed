@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using SyncLed.Avalonia.ViewModels;
 
@@ -28,6 +29,12 @@ public sealed partial class MainWindow : Window
     private readonly DispatcherTimer _cardsScrollTimer;
     private double _cardsScrollTarget;
     private bool _cardsScrollAnimating;
+    private DispatcherTimer? _pageAnimTimer;
+    private readonly DispatcherTimer _spinnerTimer;
+    private double _spinnerAngle;
+
+    /// <summary>Порог компактной боковой панели: уже — только иконки.</summary>
+    private const double CompactSidebarWidth = 1100;
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     private delegate nint WndProcDelegate(nint hwnd, int message, nint wParam, nint lParam);
@@ -56,6 +63,14 @@ public sealed partial class MainWindow : Window
             Interval = TimeSpan.FromMilliseconds(16)
         };
         _cardsScrollTimer.Tick += (_, _) => StepCardsScroll();
+
+        // Вращение индикатора поиска: стартует и останавливается по IsRefreshing.
+        _spinnerTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+        _spinnerTimer.Tick += (_, _) =>
+        {
+            _spinnerAngle = (_spinnerAngle + 14) % 360;
+            SearchSpinner.RenderTransform = new RotateTransform(_spinnerAngle);
+        };
 
         // Туннелирующий обработчик получает колесо раньше ScrollViewer,
         // поэтому стандартный «щелчок» смещения заменяется плавным доводом.
@@ -157,6 +172,17 @@ public sealed partial class MainWindow : Window
         SubscribeSavedColors();
 
         UpdatePageChrome();
+
+        if (_viewModel != null)
+            _viewModel.IsSidebarCompact = Bounds.Width < CompactSidebarWidth;
+    }
+
+    /// <summary>Ширина окна меняется → переключение обычной/компактной панели.</summary>
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == BoundsProperty && _viewModel != null)
+            _viewModel.IsSidebarCompact = Bounds.Width < CompactSidebarWidth;
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -168,7 +194,89 @@ public sealed partial class MainWindow : Window
             or nameof(MainWindowViewModel.IsLogPage))
         {
             UpdatePageChrome();
+            AnimateCurrentPage();
         }
+        else if (e.PropertyName == nameof(MainWindowViewModel.IsRefreshing))
+        {
+            UpdateSearchSpinner();
+        }
+    }
+
+    /// <summary>Крутит дугу поиска, пока идёт обновление списка устройств.</summary>
+    private void UpdateSearchSpinner()
+    {
+        if (_viewModel?.IsRefreshing == true)
+        {
+            _spinnerTimer.Start();
+            return;
+        }
+
+        _spinnerTimer.Stop();
+        _spinnerAngle = 0;
+        SearchSpinner.RenderTransform = null;
+    }
+
+    /// <summary>
+    /// Плавное появление новой страницы: прозрачность 0→1 и сдвиг на 10 px
+    /// за 160 мс. У остальных страниц состояние сбрасывается, чтобы при
+    /// быстрых переключениях не осталась полупрозрачная предыдущая.
+    /// </summary>
+    private void AnimateCurrentPage()
+    {
+        var vm = _viewModel;
+        if (vm == null) return;
+
+        Control? page =
+            vm.IsDevicesPage ? PageDevices :
+            vm.IsGroupsPage ? PageGroups :
+            vm.IsDiagnosticsPage ? PageDiagnostics :
+            vm.IsSettingsPage ? PageSettings :
+            vm.IsLogPage ? PageLog : null;
+        if (page == null) return;
+
+        _pageAnimTimer?.Stop();
+        _pageAnimTimer = null;
+        ResetPage(PageDevices, page);
+        ResetPage(PageGroups, page);
+        ResetPage(PageDiagnostics, page);
+        ResetPage(PageSettings, page);
+        ResetPage(PageLog, page);
+
+        var transform = new TranslateTransform(0, 10);
+        page.Opacity = 0;
+        page.RenderTransform = transform;
+
+        var started = DateTime.UtcNow;
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
+        timer.Tick += (_, _) =>
+        {
+            double p = Math.Clamp((DateTime.UtcNow - started).TotalMilliseconds / 160d, 0, 1);
+            double ease = 1d - Math.Pow(1d - p, 3d);
+            page.Opacity = ease;
+            transform.Y = 10d * (1d - ease);
+            if (p < 1d) return;
+
+            timer.Stop();
+            page.Opacity = 1;
+            page.RenderTransform = null;
+            if (ReferenceEquals(_pageAnimTimer, timer)) _pageAnimTimer = null;
+        };
+        _pageAnimTimer = timer;
+        timer.Start();
+    }
+
+    private static void ResetPage(Control control, Control current)
+    {
+        if (ReferenceEquals(control, current)) return;
+        control.Opacity = 1;
+        control.RenderTransform = null;
+    }
+
+    /// <summary>Чипс пресета в шапке страницы «Устройства».</summary>
+    private void OnPresetChipClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Control control || control.DataContext is not PresetItem item) return;
+        _viewModel?.ApplyPresetDirect(item);
     }
 
     private void OnDevicesChanged(object? sender, NotifyCollectionChangedEventArgs e)
