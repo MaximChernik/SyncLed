@@ -48,4 +48,7 @@ public interface ILedStrip : IDisposable
 
     /// <summary>Счётчики обмена с момента запуска приложения.</summary>
     StripStats GetStats();
+
+    /// <summary>Обнуляет счётчики обмена — для замера за произвольный период.</summary>
+    void ResetStats();
 }

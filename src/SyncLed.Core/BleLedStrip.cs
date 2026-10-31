@@ -332,6 +332,15 @@ public sealed class BleLedStrip : ILedStrip
         Interlocked.Read(ref _statBytes),
         Interlocked.Read(ref _statErrors));
 
+    /// <summary>Обнуляет счётчики обмена — для замера за произвольный период.</summary>
+    public void ResetStats()
+    {
+        Interlocked.Exchange(ref _statSent, 0);
+        Interlocked.Exchange(ref _statSkipped, 0);
+        Interlocked.Exchange(ref _statBytes, 0);
+        Interlocked.Exchange(ref _statErrors, 0);
+    }
+
     /// <summary>
     /// Лента неадресуемая: сводим цвета всех ламп к одному. Вес цвета — его
     /// яркость, чтобы тёмный фон не «съедал» насыщенность картинки.

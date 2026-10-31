@@ -126,6 +126,9 @@ public sealed class AppServices : IDisposable
         _engine?.GetDiagnostics() ??
         new DiagnosticsSnapshot(false, 0, 0, 0, new List<StripDiagnostics>());
 
+    /// <summary>Обнуляет счётчики движка и лент (кнопка «Сбросить счётчики»).</summary>
+    public void ResetDiagnostics() => _engine?.ResetDiagnostics();
+
     public void RunTest(string key, string kind) => _engine?.RunTest(key, kind);
 
     public void Dispose()

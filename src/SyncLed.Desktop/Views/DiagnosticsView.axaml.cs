@@ -94,6 +94,9 @@ public sealed partial class DiagnosticsView : UserControl
         }
     }
 
+    private void OnResetCountersClick(object? sender, RoutedEventArgs e) =>
+        (DataContext as MainWindowViewModel)?.ResetDiagnostics();
+
     private async void OnCopyReportClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainWindowViewModel viewModel) return;

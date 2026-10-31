@@ -216,6 +216,20 @@ public sealed class SyncEngine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Обнуляет счётчики диагностики: кадры движка и обмен каждой лентой.
+    /// FPS не трогаем — он и так считается по скользящему окну.
+    /// </summary>
+    public void ResetDiagnostics()
+    {
+        Interlocked.Exchange(ref _frames, 0);
+        lock (_stateLock)
+        {
+            foreach (var rt in _runtimes)
+                rt.Strip.ResetStats();
+        }
+    }
+
     /// <summary>Ручной тест ленты: "gradient", "runner" или "blink". Синхронизация на это время приостанавливается.</summary>
     public void RunTest(string key, string kind)
     {

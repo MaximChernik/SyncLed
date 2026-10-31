@@ -25,12 +25,19 @@
                  FontWeight="SemiBold"
                  Foreground="{StaticResource Brush.Text}"
                  VerticalAlignment="Center" />
-      <Button DockPanel.Dock="Right"
-              Classes="ghost"
-              Content="Копировать отчёт"
-              HorizontalAlignment="Right"
-              VerticalAlignment="Center"
-              Click="OnCopyReportClick" />
+      <StackPanel DockPanel.Dock="Right"
+                  Orientation="Horizontal"
+                  Spacing="8"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center">
+        <Button Classes="ghost"
+                Content="Сбросить счётчики"
+                Click="OnResetCountersClick"
+                ToolTip.Tip="Обнулить кадры, отправленные, пропущенные и ошибки — для замера за период" />
+        <Button Classes="ghost"
+                Content="Копировать отчёт"
+                Click="OnCopyReportClick" />
+      </StackPanel>
     </DockPanel>
 
     <Border Classes="inset" DockPanel.Dock="Top" Padding="16,12">

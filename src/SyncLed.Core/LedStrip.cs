@@ -574,6 +574,15 @@ public sealed class LedStrip : ILedStrip
         Interlocked.Read(ref _statBytes),
         Interlocked.Read(ref _statErrors));
 
+    /// <summary>Обнуляет счётчики обмена — для замера за произвольный период.</summary>
+    public void ResetStats()
+    {
+        Interlocked.Exchange(ref _statSent, 0);
+        Interlocked.Exchange(ref _statSkipped, 0);
+        Interlocked.Exchange(ref _statBytes, 0);
+        Interlocked.Exchange(ref _statErrors, 0);
+    }
+
     public void SendColors(IReadOnlyList<Rgb> colors)
     {
         lock (_sync)

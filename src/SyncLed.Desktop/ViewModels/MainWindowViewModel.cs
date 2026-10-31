@@ -689,6 +689,17 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Обнуляет счётчики диагностики (кадры движка и обмен лент) и сразу
+    /// перерисовывает таблицу: удобно перед замером за период.
+    /// </summary>
+    public void ResetDiagnostics()
+    {
+        _services.ResetDiagnostics();
+        RefreshDiagnostics();
+        AppendLog("Счётчики диагностики сброшены.");
+    }
+
     private void RefreshDiagnostics()
     {
         DiagnosticsSnapshot snapshot = _services.GetDiagnostics();
