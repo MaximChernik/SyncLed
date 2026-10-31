@@ -20,6 +20,9 @@
     <SolidColorBrush x:Key="Brush.Bg" Color="{StaticResource Color.Bg}" />
     <SolidColorBrush x:Key="Brush.Sidebar" Color="{StaticResource Color.Sidebar}" />
     <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource Color.Surface}" />
+    <!-- Фон карточек с лёгкой прозрачностью: сквозь него видно движение
+         лава-лампы, но контраст текста не страдает (212/255 ≈ 83% плотности). -->
+    <SolidColorBrush x:Key="Brush.Card" Color="#D4121620" />
     <SolidColorBrush x:Key="Brush.SurfaceAlt" Color="{StaticResource Color.SurfaceAlt}" />
     <SolidColorBrush x:Key="Brush.Inset" Color="{StaticResource Color.Inset}" />
     <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Border}" />
@@ -713,7 +716,7 @@
   </Style>
 
   <Style Selector="Border.card">
-    <Setter Property="Background" Value="{StaticResource Brush.Surface}" />
+    <Setter Property="Background" Value="{StaticResource Brush.Card}" />
     <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="18" />
@@ -725,15 +728,16 @@
     </Setter>
   </Style>
 
-  <!-- Мягкая подсветка карточки и панели при наведении. -->
+  <!-- Мягкая подсветка карточки при наведении: фон становится чуть плотнее,
+       поэтому прозрачность «залипает» только у активной карточки. -->
   <Style Selector="Border.card:pointerover">
     <Setter Property="BorderBrush" Value="#33405C" />
-    <Setter Property="Background" Value="#141926" />
+    <Setter Property="Background" Value="#DC141926" />
   </Style>
 
   <!-- Карточка при перетаскивании: «приподнята» над остальными мягкой тенью. -->
   <Style Selector="Border.card.dragging">
-    <Setter Property="Background" Value="#161C2B" />
+    <Setter Property="Background" Value="#E6161C2B" />
     <Setter Property="BorderBrush" Value="#46577E" />
     <Setter Property="BoxShadow" Value="0 8 26 2 #73000000" />
   </Style>
