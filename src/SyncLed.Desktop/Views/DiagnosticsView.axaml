@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:SyncLed.Avalonia.Views"
+             x:Class="SyncLed.Avalonia.Views.DiagnosticsView">
+  <UserControl.Resources>
+    <views:StatusToBrushConverter x:Key="StatusBrush"/>
+    <views:ErrorsToBrushConverter x:Key="ErrorsBrush"/>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <!-- Заголовок таблицы: приглушённый, с разрядкой. -->
+    <Style Selector="TextBlock.colHead">
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="LetterSpacing" Value="0.6"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </UserControl.Styles>
+  <DockPanel Margin="24">
+
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+      <TextBlock DockPanel.Dock="Left"
+                 Text="Диагностика"
+                 FontSize="20"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource Brush.Text}"
+                 VerticalAlignment="Center" />
+      <Button DockPanel.Dock="Right"
+              Classes="ghost"
+              Content="Копировать отчёт"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Center"
+              Click="OnCopyReportClick" />
+    </DockPanel>
+
+    <Border Classes="inset" DockPanel.Dock="Top" Padding="16,12">
+      <TextBlock Text="{Binding DiagnosticsSummary}"
+                 TextWrapping="Wrap"
+                 Foreground="{StaticResource Brush.TextSoft}" />
+    </Border>
+
+    <Border Classes="panel" Margin="0,14,0,0" Padding="0">
+      <DockPanel>
+        <!-- Шапка таблицы: приглушённая, с тонкой линией-разделителем. -->
+        <Border DockPanel.Dock="Top"
+                Background="#141A26"
+                BorderBrush="{StaticResource Brush.BorderSoft}"
+                BorderThickness="0,0,0,1"
+                Padding="14,10">
+          <Grid ColumnDefinitions="200,110,110,150,100,70,70,90,70">
+            <TextBlock Grid.Column="0" Classes="colHead" Text="Лента" />
+            <TextBlock Grid.Column="1" Classes="colHead" Text="Транспорт" />
+            <TextBlock Grid.Column="2" Classes="colHead" Text="Статус" />
+            <TextBlock Grid.Column="3" Classes="colHead" Text="Монитор" />
+            <TextBlock Grid.Column="4" Classes="colHead" Text="Режим" />
+            <TextBlock Grid.Column="5" Classes="colHead" Text="Отпр." HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="6" Classes="colHead" Text="Проп." HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="7" Classes="colHead" Text="Трафик" HorizontalAlignment="Right" />
+            <TextBlock Grid.Column="8" Classes="colHead" Text="Ошибки" HorizontalAlignment="Right" />
+          </Grid>
+        </Border>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+          <!-- Чётные строки получают мягкий фон через класс «alt»,
+               который ставит code-behind на контейнерах элементов. -->
+          <ItemsControl x:Name="DiagnosticTable" ItemsSource="{Binding DiagnosticRows}">
+            <ItemsControl.Styles>
+              <Style Selector="ContentPresenter.alt">
+                <Setter Property="Background" Value="#0E131C"/>
+              </Style>
+            </ItemsControl.Styles>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="200,110,110,150,100,70,70,90,70" Margin="14,7">
+                  <TextBlock Grid.Column="0"
+                             Text="{Binding Name}"
+                             Foreground="{StaticResource Brush.Text}"
+                             TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="1"
+                             Text="{Binding Transport}"
+                             Foreground="{StaticResource Brush.Muted}"
+                             TextTrimming="CharacterEllipsis" />
+                  <!-- Статус: зелёный «Подключено», красный «Нет связи»,
+                       янтарный «Тест»/«Пауза». -->
+                  <TextBlock Grid.Column="2"
+                             Text="{Binding Status}"
+                             Foreground="{Binding Status, Converter={StaticResource StatusBrush}}"
+                             FontWeight="SemiBold" />
+                  <TextBlock Grid.Column="3"
+                             Text="{Binding Monitor}"
+                             Foreground="{StaticResource Brush.Muted}"
+                             TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="4"
+                             Text="{Binding Mode}"
+                             Foreground="{StaticResource Brush.Muted}" />
+                  <TextBlock Grid.Column="5"
+                             Text="{Binding Sent}"
+                             Foreground="{StaticResource Brush.TextSoft}"
+                             HorizontalAlignment="Right" />
+                  <TextBlock Grid.Column="6"
+                             Text="{Binding Skipped}"
+                             Foreground="{StaticResource Brush.Muted}"
+                             HorizontalAlignment="Right" />
+                  <TextBlock Grid.Column="7"
+                             Text="{Binding Traffic}"
+                             Foreground="{StaticResource Brush.TextSoft}"
+                             HorizontalAlignment="Right" />
+                  <!-- Ошибки: красные при ненулевом счётчике. -->
+                  <TextBlock Grid.Column="8"
+                             Text="{Binding Errors}"
+                             Foreground="{Binding Errors, Converter={StaticResource ErrorsBrush}}"
+                             FontWeight="SemiBold"
+                             HorizontalAlignment="Right" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+
+  </DockPanel>
+</UserControl>

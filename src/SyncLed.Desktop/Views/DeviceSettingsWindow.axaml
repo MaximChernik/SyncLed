@@ -1,0 +1,193 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:SyncLed.Avalonia.Views"
+        x:Class="SyncLed.Avalonia.Views.DeviceSettingsWindow"
+        Title="Настройки ленты"
+        Width="640"
+        SizeToContent="Height"
+        MaxHeight="760"
+        ShowInTaskbar="False"
+        SystemDecorations="None"
+        Background="{StaticResource Brush.Bg}"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid RowDefinitions="40,*">
+
+    <!-- ── заголовочная панель окна ─────────────────────────────────────── -->
+    <views:WindowChrome Grid.Row="0"
+                        Title="Настройки ленты"
+                        ShowMinimize="False"
+                        ShowMaximize="False"/>
+
+    <ScrollViewer Grid.Row="1">
+    <Border Classes="panel"
+            Margin="20"
+            Padding="24,20"
+            HorizontalAlignment="Stretch">
+      <StackPanel Spacing="4">
+
+        <TextBlock Text="Настройки ленты"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Brush.Text}"
+                   Margin="0,0,0,6" />
+
+        <TextBlock Text="{Binding Hint}"
+                   Foreground="{Binding HintBrush}"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,12" />
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+          <TextBlock Text="Отдельные настройки для этой ленты"
+                     Foreground="{StaticResource Brush.Text}"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding UseCustom, Mode=TwoWay}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Classes="inset"
+                Padding="16,12"
+                IsEnabled="{Binding UseCustom}">
+          <StackPanel Spacing="2">
+
+            <Grid ColumnDefinitions="165,*,46" Margin="0,3">
+              <TextBlock Grid.Column="0" Text="Яркость, %" VerticalAlignment="Center" />
+              <Slider Grid.Column="1"
+                      Minimum="5" Maximum="100"
+                      SmallChange="1" LargeChange="10"
+                      Value="{Binding Brightness, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding Brightness}"
+                         Foreground="{StaticResource Brush.Text}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="165,*,46" Margin="0,3">
+              <TextBlock Grid.Column="0" Text="Насыщенность, %" VerticalAlignment="Center" />
+              <Slider Grid.Column="1"
+                      Minimum="0" Maximum="200"
+                      SmallChange="1" LargeChange="10"
+                      Value="{Binding Saturation, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding Saturation}"
+                         Foreground="{StaticResource Brush.Text}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="165,*,46" Margin="0,3">
+              <TextBlock Grid.Column="0" Text="Гамма, %" VerticalAlignment="Center" />
+              <Slider Grid.Column="1"
+                      Minimum="50" Maximum="250"
+                      SmallChange="1" LargeChange="10"
+                      Value="{Binding GammaPercent, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding GammaPercent}"
+                         Foreground="{StaticResource Brush.Text}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="165,*,46" Margin="0,3">
+              <TextBlock Grid.Column="0" Text="Сглаживание, %" VerticalAlignment="Center" />
+              <Slider Grid.Column="1"
+                      Minimum="0" Maximum="95"
+                      SmallChange="1" LargeChange="10"
+                      Value="{Binding Smoothing, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding Smoothing}"
+                         Foreground="{StaticResource Brush.Text}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="165,*,46" Margin="0,3">
+              <TextBlock Grid.Column="0" Text="Порог чёрного" VerticalAlignment="Center" />
+              <Slider Grid.Column="1"
+                      Minimum="0" Maximum="60"
+                      SmallChange="1" LargeChange="5"
+                      Value="{Binding BlackThreshold, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding BlackThreshold}"
+                         Foreground="{StaticResource Brush.Text}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="165,*,46" Margin="0,3">
+              <TextBlock Grid.Column="0" Text="Глубина краёв, %" VerticalAlignment="Center" />
+              <Slider Grid.Column="1"
+                      Minimum="4" Maximum="30"
+                      SmallChange="1" LargeChange="5"
+                      Value="{Binding EdgeDepthPercent, Mode=TwoWay}"
+                      VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding EdgeDepthPercent}"
+                         Foreground="{StaticResource Brush.Text}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+
+          </StackPanel>
+        </Border>
+
+        <TextBlock Text="Изменения применяются сразу и сохраняются автоматически. Значения выше показывают, что реально применяется к ленте."
+                   Foreground="{StaticResource Brush.Muted}"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   Margin="0,12,0,0" />
+
+        <Button Classes="primary"
+                Content="OK"
+                Click="OnOkClick"
+                HorizontalAlignment="Right"
+                Margin="0,14,0,0" />
+
+      </StackPanel>
+    </Border>
+    </ScrollViewer>
+
+    <!-- ── зоны изменения размера окна (SystemDecorations="None") ─────────── -->
+    <Border Grid.Row="0" Grid.RowSpan="2" Width="5"
+            HorizontalAlignment="Left" VerticalAlignment="Stretch"
+            Background="Transparent" Cursor="SizeWestEast"
+            ZIndex="900" views:WindowChrome.Edge="West"/>
+    <Border Grid.Row="0" Grid.RowSpan="2" Width="5"
+            HorizontalAlignment="Right" VerticalAlignment="Stretch"
+            Background="Transparent" Cursor="SizeWestEast"
+            ZIndex="900" views:WindowChrome.Edge="East"/>
+    <Border Grid.Row="1" Height="5"
+            HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+            Background="Transparent" Cursor="SizeNorthSouth"
+            ZIndex="900" views:WindowChrome.Edge="South"/>
+    <Border Grid.Row="0" Height="5" Margin="140,0,70,0"
+            HorizontalAlignment="Stretch" VerticalAlignment="Top"
+            Background="Transparent" Cursor="SizeNorthSouth"
+            ZIndex="900" views:WindowChrome.Edge="North"/>
+    <Border Grid.Row="0" Grid.RowSpan="2" Width="9" Height="9"
+            HorizontalAlignment="Left" VerticalAlignment="Top"
+            Background="Transparent" Cursor="SizeAll"
+            ZIndex="901" views:WindowChrome.Edge="NorthWest"/>
+    <Border Grid.Row="0" Grid.RowSpan="2" Width="9" Height="9"
+            HorizontalAlignment="Right" VerticalAlignment="Top"
+            Background="Transparent" Cursor="SizeAll"
+            ZIndex="901" views:WindowChrome.Edge="NorthEast"/>
+    <Border Grid.Row="0" Grid.RowSpan="2" Width="9" Height="9"
+            HorizontalAlignment="Left" VerticalAlignment="Bottom"
+            Background="Transparent" Cursor="SizeAll"
+            ZIndex="901" views:WindowChrome.Edge="SouthWest"/>
+    <Border Grid.Row="0" Grid.RowSpan="2" Width="9" Height="9"
+            HorizontalAlignment="Right" VerticalAlignment="Bottom"
+            Background="Transparent" Cursor="SizeAll"
+            ZIndex="901" views:WindowChrome.Edge="SouthEast"/>
+  </Grid>
+</Window>

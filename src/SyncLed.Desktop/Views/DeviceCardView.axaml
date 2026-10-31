@@ -1,0 +1,502 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SyncLed.Avalonia.ViewModels"
+             xmlns:core="using:SyncLed"
+             xmlns:views="using:SyncLed.Avalonia.Views"
+             x:Class="SyncLed.Avalonia.Views.DeviceCardView"
+             x:DataType="vm:DeviceViewModel">
+  <UserControl.Styles>
+    <!-- ── секции карточки ─────────────────────────────────────────────── -->
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="10.5"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="0.9"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBlock.subTitle">
+      <Setter Property="FontSize" Value="9.5"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="0.7"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="FontSize" Value="10"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Border.divider">
+      <Setter Property="Height" Value="1"/>
+      <Setter Property="Background" Value="{StaticResource Brush.BorderSoft}"/>
+    </Style>
+
+    <!-- ── шапка: имя, описание, статус ────────────────────────────────── -->
+    <Style Selector="TextBlock.cardTitle">
+      <Setter Property="FontSize" Value="13.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Text}"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="ToolTip.Tip" Value="Двойной щелчок — переименовать"/>
+    </Style>
+    <Style Selector="TextBlock.cardDetail">
+      <Setter Property="FontSize" Value="10.5"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBox.renameBox">
+      <Setter Property="FontSize" Value="13.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Height" Value="30"/>
+      <Setter Property="MinHeight" Value="30"/>
+      <Setter Property="MinWidth" Value="120"/>
+      <Setter Property="Padding" Value="9,4"/>
+      <Setter Property="Watermark" Value="Имя ленты"/>
+      <Setter Property="ToolTip.Tip" Value="Enter — сохранить, Esc — отмена"/>
+    </Style>
+    <Style Selector="Border.statusTag">
+      <Setter Property="Height" Value="24"/>
+      <Setter Property="Padding" Value="10,0"/>
+      <Setter Property="Background" Value="#111725"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Border.statusTag Border.dot">
+      <Setter Property="Width" Value="7"/>
+      <Setter Property="Height" Value="7"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Background" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ── подписи полей: одинаковый стиль для всех меток секций ───────── -->
+    <Style Selector="TextBlock.field">
+      <Setter Property="FontSize" Value="9.5"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="0.7"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Числовое значение рядом с ползунком: фиксированная колонка справа. -->
+    <Style Selector="TextBlock.sliderValue">
+      <Setter Property="FontSize" Value="11.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}"/>
+      <Setter Property="TextAlignment" Value="Right"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ── компактные кнопки карточки ──────────────────────────────────── -->
+    <Style Selector="Button.ghost.sm">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="Padding" Value="8,0"/>
+      <Setter Property="FontSize" Value="11.5"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+
+    <!-- Компактный переключатель в карточке (например, «Реверс»). -->
+    <Style Selector="ToggleSwitch.tight">
+      <Setter Property="MinWidth" Value="40"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <!-- ── цветовые образцы ────────────────────────────────────────────── -->
+    <Style Selector="Button.swatch">
+      <Setter Property="Width" Value="22"/>
+      <Setter Property="Height" Value="22"/>
+      <Setter Property="MinWidth" Value="22"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="0,0,6,6"/>
+      <Setter Property="BorderThickness" Value="2"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="CornerRadius" Value="7"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Button.swatch /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
+      <Setter Property="BorderThickness" Value="{Binding $parent[Button].BorderThickness}"/>
+      <Setter Property="CornerRadius" Value="7"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="Button.swatch:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
+    </Style>
+    <Style Selector="Button.swatch:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{Binding $parent[Button].Background}"/>
+      <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}"/>
+    </Style>
+    <!-- выбранный образец обведён светлым кольцом; порядок важен: наведение
+         поверх выбранного сохраняет кольцо -->
+    <Style Selector="Button.swatch.selected">
+      <Setter Property="BorderBrush" Value="#F4F7FC"/>
+    </Style>
+    <Style Selector="Button.swatch:pointerover">
+      <Setter Property="BorderBrush" Value="#7D89A6"/>
+    </Style>
+    <Style Selector="Button.swatch.selected:pointerover">
+      <Setter Property="BorderBrush" Value="#FFFFFF"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Border x:Name="CardBorder" Classes="card" Padding="18,16">
+    <StackPanel Spacing="12">
+
+      <!-- ── шапка: ручка, имя, статус, включение ─────────────────────── -->
+      <!-- Общие высоты строк (30/26) держат заголовок, кнопки, тумблер и
+           статус на одной базовой линии при любом DPI. -->
+      <Grid RowDefinitions="30,26">
+
+        <!-- верхняя строка: идентичность и действия редактировать → настройки → вкл.
+             Колонки шире кнопок (26 → 36/36/58), чтобы между действиями был
+             видимый отступ и подсветки при наведении не сливались. -->
+        <Grid Grid.Row="0" ColumnDefinitions="22,*,36,36,58">
+          <!-- ручка перетаскивания: шесть точек, векторные — чёткие на любом DPI -->
+          <Button x:Name="DragHandle"
+                  Grid.Column="0"
+                  Classes="dragHandle"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Перетащите, чтобы изменить порядок лент">
+            <Canvas Width="9" Height="15">
+              <Ellipse Width="2.4" Height="2.4" Canvas.Left="0" Canvas.Top="1.3"/>
+              <Ellipse Width="2.4" Height="2.4" Canvas.Left="6.6" Canvas.Top="1.3"/>
+              <Ellipse Width="2.4" Height="2.4" Canvas.Left="0" Canvas.Top="6.3"/>
+              <Ellipse Width="2.4" Height="2.4" Canvas.Left="6.6" Canvas.Top="6.3"/>
+              <Ellipse Width="2.4" Height="2.4" Canvas.Left="0" Canvas.Top="11.3"/>
+              <Ellipse Width="2.4" Height="2.4" Canvas.Left="6.6" Canvas.Top="11.3"/>
+            </Canvas>
+          </Button>
+
+          <TextBlock x:Name="TitleText"
+                     Grid.Column="1"
+                     Classes="cardTitle"
+                     Text="{Binding Title}"
+                     Margin="0,0,12,0"
+                     DoubleTapped="OnTitleTapped"/>
+          <TextBox x:Name="RenameBox"
+                   Grid.Column="1"
+                   Classes="renameBox"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   IsVisible="False"
+                   KeyDown="OnRenameKeyDown"
+                   LostFocus="OnRenameLostFocus"/>
+
+          <Button x:Name="RenameButton"
+                  Grid.Column="2"
+                  Classes="iconSm"
+                  Content="✎"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Click="OnRenameClick"
+                  ToolTip.Tip="Переименовать ленту"/>
+
+          <Button x:Name="SettingsButton"
+                  Grid.Column="3"
+                  Classes="iconSm"
+                  Content="⚙"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Click="OnOpenSettingsClick"
+                  ToolTip.Tip="Персональные настройки ленты"/>
+
+          <ToggleSwitch Grid.Column="4"
+                        IsChecked="{Binding Enabled}"
+                        OnContent=""
+                        OffContent=""
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        MinWidth="40"
+                        ToolTip.Tip="Лента включена"/>
+        </Grid>
+
+        <!-- нижняя строка: описание слева, состояние справа -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,110">
+          <TextBlock Grid.Column="0"
+                     Classes="cardDetail"
+                     Text="{Binding Detail}"
+                     VerticalAlignment="Center"
+                     Margin="0,0,12,0"/>
+
+          <Border Grid.Column="1"
+                  Classes="statusTag"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+              <Border Classes="dot" Background="{Binding StatusBrush}"/>
+              <TextBlock Text="{Binding StatusText}"
+                         FontSize="11"
+                         Foreground="{StaticResource Brush.TextSoft}"
+                         VerticalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Grid>
+
+      <!-- ── широкая живая миниатюра ────────────────────────────────────── -->
+      <Border Classes="inset"
+              Height="150"
+              Padding="4"
+              ToolTip.Tip="Пунктирная рамка показывает область экрана, которая попадает в подсветку">
+        <views:DevicePreviewControl/>
+      </Border>
+
+      <!-- ── параметры: связь → калибровка ─────────────────────────────── -->
+      <Border Classes="inset" Padding="14,12">
+        <StackPanel Spacing="10">
+
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Classes="sectionTitle" Text="ПАРАМЕТРЫ"/>
+            <Border Grid.Column="1" Classes="divider" Margin="12,0,0,0" VerticalAlignment="Center"/>
+          </Grid>
+
+          <!-- связь: монитор, режим, группа -->
+          <TextBlock Classes="subTitle" Text="СВЯЗЬ"/>
+          <Grid ColumnDefinitions="*,14,*" RowDefinitions="64,76">
+            <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
+              <TextBlock Classes="field" Text="МОНИТОР"/>
+              <ComboBox ItemsSource="{Binding MonitorChoices}"
+                        SelectedItem="{Binding SelectedMonitor}"
+                        Height="36"
+                        MinHeight="36"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="core:MonitorChoice">
+                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="2" Spacing="6">
+              <TextBlock Classes="field" Text="РЕЖИМ"/>
+              <ComboBox ItemsSource="{Binding ModeChoices}"
+                        SelectedItem="{Binding SelectedMode}"
+                        Height="36"
+                        MinHeight="36"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ChoiceItem">
+                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="6">
+              <TextBlock Classes="field" Text="ГРУППА"/>
+              <ComboBox ItemsSource="{Binding GroupChoices}"
+                        SelectedItem="{Binding SelectedGroup}"
+                        Height="36"
+                        MinHeight="36"
+                        HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:GroupItem">
+                    <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+          </Grid>
+
+          <!-- калибровка: сдвиг, горизонталь, реверс, баланс RGB -->
+          <TextBlock Classes="subTitle" Text="КАЛИБРОВКА"/>
+          <Grid ColumnDefinitions="*,14,*" RowDefinitions="64,68">
+            <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
+              <TextBlock Classes="field" Text="СДВИГ НАЧАЛА"/>
+              <Grid ColumnDefinitions="*,8,44">
+                <Slider x:Name="ShiftSlider"
+                        Grid.Column="0"
+                        Minimum="0"
+                        Maximum="1"
+                        SmallChange="1"
+                        LargeChange="10"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        VerticalAlignment="Center"
+                        ToolTip.Tip="На сколько светодиодов сдвинуть начало подсветки"/>
+                <TextBlock x:Name="ShiftValueText"
+                           Grid.Column="2"
+                           Classes="sliderValue"
+                           Text="0"/>
+              </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="2" Spacing="6">
+              <TextBlock Classes="field" Text="LED ПО ГОРИЗОНТАЛИ"/>
+              <Grid ColumnDefinitions="*,8,44">
+                <Slider x:Name="HorizontalSlider"
+                        Grid.Column="0"
+                        Minimum="0"
+                        Maximum="126"
+                        SmallChange="1"
+                        LargeChange="10"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        VerticalAlignment="Center"
+                        ToolTip.Tip="Сколько светодиодов в ряду по горизонтали (0 — авто)"/>
+                <TextBlock x:Name="HorizontalValueText"
+                           Grid.Column="2"
+                           Classes="sliderValue"
+                           Text="0"/>
+              </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="6">
+              <TextBlock Classes="field" Text="РЕВЕРС"/>
+              <ToggleSwitch Classes="tight"
+                            IsChecked="{Binding Reverse, Mode=TwoWay}"
+                            OnContent=""
+                            OffContent=""
+                            ToolTip.Tip="Меняет направление бегущего огня"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="2" Spacing="6">
+              <TextBlock Classes="field" Text="БАЛАНС RGB"/>
+              <Grid ColumnDefinitions="*,6,*,6,*">
+                <Grid Grid.Column="0" ColumnDefinitions="Auto,*">
+                  <TextBlock Grid.Column="0"
+                             Classes="field"
+                             Text="R"
+                             Foreground="#FF7C86"
+                             VerticalAlignment="Center"
+                             Margin="0,0,6,0"/>
+                  <NumericUpDown x:Name="GainRBox"
+                                 Grid.Column="1"
+                                 Minimum="20" Maximum="200" Increment="5"
+                                 ShowButtonSpinner="False"
+                                 MinWidth="0"
+                                 TextAlignment="Right"
+                                 HorizontalAlignment="Stretch"/>
+                </Grid>
+                <Grid Grid.Column="2" ColumnDefinitions="Auto,*">
+                  <TextBlock Grid.Column="0"
+                             Classes="field"
+                             Text="G"
+                             Foreground="#60E09E"
+                             VerticalAlignment="Center"
+                             Margin="0,0,6,0"/>
+                  <NumericUpDown x:Name="GainGBox"
+                                 Grid.Column="1"
+                                 Minimum="20" Maximum="200" Increment="5"
+                                 ShowButtonSpinner="False"
+                                 MinWidth="0"
+                                 TextAlignment="Right"
+                                 HorizontalAlignment="Stretch"/>
+                </Grid>
+                <Grid Grid.Column="4" ColumnDefinitions="Auto,*">
+                  <TextBlock Grid.Column="0"
+                             Classes="field"
+                             Text="B"
+                             Foreground="#74A8FF"
+                             VerticalAlignment="Center"
+                             Margin="0,0,6,0"/>
+                  <NumericUpDown x:Name="GainBBox"
+                                 Grid.Column="1"
+                                 Minimum="20" Maximum="200" Increment="5"
+                                 ShowButtonSpinner="False"
+                                 MinWidth="0"
+                                 TextAlignment="Right"
+                                 HorizontalAlignment="Stretch"/>
+                </Grid>
+              </Grid>
+            </StackPanel>
+          </Grid>
+
+        </StackPanel>
+      </Border>
+
+      <!-- ── цвет: встроенная палитра, свой цвет и «Мои цвета» ─────────── -->
+      <Border Classes="inset" Padding="14,12">
+        <StackPanel Spacing="10">
+
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Classes="sectionTitle" Text="ЦВЕТ"/>
+            <Border Grid.Column="1" Classes="divider" Margin="12,0,0,0" VerticalAlignment="Center"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="*,Auto">
+            <WrapPanel x:Name="PaletteHost"/>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="6"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center">
+              <Button x:Name="SaveColorButton"
+                      Classes="iconSm"
+                      Content="★"
+                      Click="OnSaveColorClick"
+                      ToolTip.Tip="Сохранить текущий цвет в «Мои цвета»"/>
+              <Button Classes="ghost sm"
+                      Content="Свой цвет…"
+                      Click="OnPickColorClick"
+                      ToolTip.Tip="Задать цвет вручную: RGB или HEX"/>
+            </StackPanel>
+          </Grid>
+
+          <Grid x:Name="SavedHeader" ColumnDefinitions="Auto,*" IsVisible="False">
+            <TextBlock Classes="subTitle" Text="МОИ ЦВЕТА"/>
+            <TextBlock Grid.Column="1"
+                       Classes="hint"
+                       Text="общие для всех лент · ПКМ — удалить"
+                       HorizontalAlignment="Right"
+                       Margin="10,0,0,0"/>
+          </Grid>
+          <WrapPanel x:Name="SavedColorHost"/>
+          <TextBlock x:Name="SavedHint"
+                     Classes="hint"
+                     Text="Нажмите ★, чтобы сохранить текущий цвет — он появится во всех карточках."/>
+        </StackPanel>
+      </Border>
+
+      <!-- ── тесты ленты ────────────────────────────────────────────────── -->
+      <Border Classes="inset" Padding="14,12">
+        <StackPanel Spacing="10">
+
+          <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Classes="sectionTitle" Text="ПРОВЕРКА ЛЕНТЫ"/>
+            <Border Grid.Column="1" Classes="divider" Margin="12,0,0,0" VerticalAlignment="Center"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="*,8,*,8,*">
+            <Button Grid.Column="0"
+                    Classes="ghost sm"
+                    Content="Проверить цвета"
+                    HorizontalAlignment="Stretch"
+                    Tag="gradient" Click="OnTestClick"
+                    ToolTip.Tip="Радужный градиент по всей ленте"/>
+            <Button Grid.Column="2"
+                    Classes="ghost sm"
+                    Content="Бегущий огонёк"
+                    HorizontalAlignment="Stretch"
+                    Tag="runner" Click="OnTestClick"
+                    ToolTip.Tip="Один светодиод пробегает по ленте"/>
+            <Button Grid.Column="4"
+                    Classes="ghost sm"
+                    Content="Мигнуть"
+                    HorizontalAlignment="Stretch"
+                    Tag="blink" Click="OnTestClick"
+                    ToolTip.Tip="Три белые вспышки: так легко найти нужную ленту"/>
+          </Grid>
+
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </Border>
+</UserControl>

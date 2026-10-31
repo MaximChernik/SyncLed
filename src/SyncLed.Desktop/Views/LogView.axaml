@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:SyncLed.Avalonia.Views"
+             x:Class="SyncLed.Avalonia.Views.LogView">
+  <UserControl.Resources>
+    <views:LogLinesConverter x:Key="LogLines"/>
+  </UserControl.Resources>
+  <DockPanel Margin="24">
+
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+      <TextBlock DockPanel.Dock="Left"
+                 Text="Журнал событий"
+                 FontSize="20"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource Brush.Text}"
+                 VerticalAlignment="Center" />
+      <TextBlock DockPanel.Dock="Right"
+                 Text="Последние 200 сообщений"
+                 Foreground="{StaticResource Brush.Muted}"
+                 FontSize="12"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Center" />
+    </DockPanel>
+
+    <Border Classes="inset" Padding="14">
+      <Panel>
+
+        <!-- Строки журнала с семантическими цветовыми акцентами:
+             ошибки — красные, успех — зелёный, предупреждения — янтарные,
+             остальное — нейтральный моноширинный текст. -->
+        <ScrollViewer x:Name="LogScroller"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding LogText, Mode=OneWay, Converter={StaticResource LogLines}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Text}"
+                           Foreground="{Binding Brush}"
+                           FontFamily="Cascadia Mono,Consolas"
+                           FontSize="12.5"
+                           TextWrapping="NoWrap" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <TextBlock x:Name="EmptyHint"
+                   Text="Журнал пуст"
+                   Foreground="{StaticResource Brush.Muted}"
+                   FontSize="12.5"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   IsVisible="False" />
+
+      </Panel>
+    </Border>
+
+  </DockPanel>
+</UserControl>

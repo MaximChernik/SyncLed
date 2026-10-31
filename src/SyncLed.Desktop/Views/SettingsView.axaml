@@ -1,0 +1,366 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:automation="clr-namespace:Avalonia.Automation;assembly=Avalonia.Controls"
+             x:Class="SyncLed.Avalonia.Views.SettingsView">
+  <UserControl.Styles>
+    <Style Selector="TextBlock.presetState">
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+    </Style>
+    <Style Selector="TextBlock.presetState.active">
+      <Setter Property="Foreground" Value="{StaticResource Brush.Good}"/>
+    </Style>
+    <Style Selector="TextBlock.presetState.modified">
+      <Setter Property="Foreground" Value="{StaticResource Brush.Warn}"/>
+    </Style>
+    <Style Selector="Border.stateDot">
+      <Setter Property="Background" Value="{StaticResource Brush.Muted}"/>
+    </Style>
+    <Style Selector="Border.stateDot.active">
+      <Setter Property="Background" Value="{StaticResource Brush.Good}"/>
+    </Style>
+    <Style Selector="Border.stateDot.modified">
+      <Setter Property="Background" Value="{StaticResource Brush.Warn}"/>
+    </Style>
+  </UserControl.Styles>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <Border Classes="panel"
+            Width="680"
+            HorizontalAlignment="Center"
+            Margin="24"
+            Padding="28,24">
+      <StackPanel Spacing="4">
+
+        <Grid ColumnDefinitions="*,Auto"
+              Margin="0,0,0,10">
+          <TextBlock Text="Пресеты"
+                     FontSize="16"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource Brush.Text}"
+                     VerticalAlignment="Center"/>
+          <Button Grid.Column="1"
+                  Classes="ghost"
+                  Content="Справка"
+                  MinWidth="96"
+                  Height="32"
+                  FontSize="12"
+                  Click="OnHelpClick"
+                  ToolTip.Tip="Что означает каждый параметр"/>
+        </Grid>
+
+        <TextBlock Text="Пресет хранит общие яркость, насыщенность, гамму, сглаживание, порог чёрного и глубину краёв. Собственные настройки лент и групп не меняются."
+                   Foreground="{StaticResource Brush.Muted}"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="250,*" Margin="0,5">
+          <TextBlock Grid.Column="0"
+                     Text="Доступные пресеты"
+                     VerticalAlignment="Center" />
+          <DockPanel Grid.Column="1">
+            <Button DockPanel.Dock="Right"
+                    Classes="ghost"
+                    Content="Применить"
+                    Command="{Binding ApplyPresetCommand}"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center" />
+            <ComboBox ItemsSource="{Binding Presets}"
+                      SelectedItem="{Binding SelectedPreset}"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      PlaceholderText="Выберите пресет">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal"
+                              Spacing="8"
+                              automation:AutomationProperties.Name="{Binding Name}">
+                    <TextBlock Text="✓"
+                               Foreground="{StaticResource Brush.Accent}"
+                               FontWeight="SemiBold"
+                               IsVisible="{Binding IsActive}"/>
+                    <TextBlock Text="{Binding Name}"/>
+                    <TextBlock Text="{Binding Mark}"
+                               FontSize="11"
+                               Foreground="{StaticResource Brush.Muted}"
+                               VerticalAlignment="Center"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </DockPanel>
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*" Margin="0,5,0,6">
+          <TextBlock Grid.Column="0"
+                     Text="Активный пресет"
+                     VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1"
+                      Orientation="Horizontal"
+                      Spacing="8">
+            <Border Width="8"
+                    Height="8"
+                    CornerRadius="4"
+                    VerticalAlignment="Center"
+                    Classes="stateDot"
+                    Classes.active="{Binding IsPresetActive}"
+                    Classes.modified="{Binding IsPresetModified}" />
+            <TextBlock Text="{Binding ActivePresetText}"
+                       FontSize="12"
+                       VerticalAlignment="Center"
+                       Classes="presetState"
+                       Classes.active="{Binding IsPresetActive}"
+                       Classes.modified="{Binding IsPresetModified}" />
+          </StackPanel>
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,Auto" Margin="0,5">
+          <TextBlock Grid.Column="0"
+                     Text="Название нового пресета"
+                     VerticalAlignment="Center" />
+          <TextBox Grid.Column="1"
+                   Margin="0,0,8,0"
+                   Watermark="Например, Вечер"
+                   Text="{Binding NewPresetName}"
+                   VerticalAlignment="Center" />
+          <Button Grid.Column="2"
+                  Classes="ghost"
+                  Content="Сохранить текущие"
+                  Command="{Binding SavePresetCommand}"
+                  VerticalAlignment="Center" />
+        </Grid>
+
+        <DockPanel Margin="0,8,0,0">
+          <Button DockPanel.Dock="Right"
+                  Classes="ghost"
+                  Content="Удалить"
+                  Command="{Binding DeletePresetCommand}"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center" />
+          <TextBlock Text="{Binding PresetStatus}"
+                     Foreground="{StaticResource Brush.Muted}"
+                     FontSize="12"
+                     TextTrimming="CharacterEllipsis"
+                     VerticalAlignment="Center" />
+        </DockPanel>
+
+        <Border Height="1" Background="{StaticResource Brush.BorderSoft}" Margin="0,14" />
+
+        <TextBlock Text="Изображение"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Brush.Text}"
+                   Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Кадры в секунду" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="5" Maximum="60"
+                  SmallChange="1" LargeChange="5"
+                  Value="{Binding Fps}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding Fps}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Яркость, %" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="5" Maximum="100"
+                  SmallChange="1" LargeChange="10"
+                  Value="{Binding Brightness}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding Brightness}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Насыщенность, %" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="0" Maximum="200"
+                  SmallChange="1" LargeChange="10"
+                  Value="{Binding Saturation}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding Saturation}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Гамма, %" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="50" Maximum="250"
+                  SmallChange="1" LargeChange="10"
+                  Value="{Binding Gamma}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding Gamma}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Сглаживание, %" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="0" Maximum="95"
+                  SmallChange="1" LargeChange="10"
+                  Value="{Binding Smoothing}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding Smoothing}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Порог чёрного" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="0" Maximum="60"
+                  SmallChange="1" LargeChange="5"
+                  Value="{Binding BlackThreshold}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding BlackThreshold}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0" Text="Глубина краёв, %" VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="4" Maximum="30"
+                  SmallChange="1" LargeChange="5"
+                  Value="{Binding EdgeDepth}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding EdgeDepth}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Height="1" Background="{StaticResource Brush.BorderSoft}" Margin="0,14" />
+
+        <TextBlock Text="Bluetooth"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Brush.Text}"
+                   Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="250,*,52" Margin="0,5">
+          <TextBlock Grid.Column="0"
+                     Text="Аппаратная яркость лент, %"
+                     VerticalAlignment="Center" />
+          <Slider Grid.Column="1"
+                  Minimum="1" Maximum="100"
+                  SmallChange="1" LargeChange="10"
+                  Value="{Binding BluetoothBrightness}"
+                  VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding BluetoothBrightness}"
+                     Foreground="{StaticResource Brush.Text}"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Center" />
+        </Grid>
+        <TextBlock Text="Выше ~30 дешёвые контроллеры уходят в защиту по току: лента вспыхивает и гаснет."
+                   Foreground="{StaticResource Brush.Muted}"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   Margin="0,2,0,4" />
+
+        <Border Height="1" Background="{StaticResource Brush.BorderSoft}" Margin="0,14" />
+
+        <TextBlock Text="Приложение"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Brush.Text}"
+                   Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+          <TextBlock Text="Запускать синхронизацию при старте"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding StartSyncOnLaunch}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+          <TextBlock Text="Запускать вместе с Windows"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding StartWithWindows}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+          <TextBlock Text="Сворачивать окно в трей"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding MinimizeToTray}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+          <TextBlock Text="Пауза, когда экран неактивен"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding PauseWhenInactive}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Height="1" Background="{StaticResource Brush.BorderSoft}" Margin="0,14" />
+
+        <TextBlock Text="Поиск устройств"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource Brush.Text}"
+                   Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+          <TextBlock Text="Искать ленты других производителей (RB/SC)"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding ProbeCompatible}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" Margin="0,6">
+          <TextBlock Text="Искать Bluetooth LE ленты"
+                     VerticalAlignment="Center" />
+          <ToggleSwitch Grid.Column="1"
+                        OnContent="Да" OffContent="Нет"
+                        IsChecked="{Binding ScanBluetooth}"
+                        VerticalAlignment="Center" />
+        </Grid>
+
+        <DockPanel Margin="0,18,0,0">
+          <TextBlock DockPanel.Dock="Left"
+                     Text="Изменения применяются и сохраняются автоматически"
+                     Foreground="{StaticResource Brush.Muted}"
+                     FontSize="12"
+                     VerticalAlignment="Center" />
+          <Button Classes="primary"
+                  Content="Сохранить"
+                  HorizontalAlignment="Right"
+                  Click="OnSaveClick" />
+        </DockPanel>
+
+      </StackPanel>
+    </Border>
+  </ScrollViewer>
+</UserControl>

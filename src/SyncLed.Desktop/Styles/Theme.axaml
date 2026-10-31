@@ -1,0 +1,1019 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <Color x:Key="Color.Bg">#090B10</Color>
+    <Color x:Key="Color.Sidebar">#0C0F16</Color>
+    <Color x:Key="Color.Surface">#121620</Color>
+    <Color x:Key="Color.SurfaceAlt">#1A2030</Color>
+    <Color x:Key="Color.Inset">#0D1119</Color>
+    <Color x:Key="Color.Border">#2A3344</Color>
+    <Color x:Key="Color.BorderSoft">#1E2634</Color>
+    <Color x:Key="Color.Text">#F4F7FC</Color>
+    <Color x:Key="Color.TextSoft">#C7CFDE</Color>
+    <Color x:Key="Color.Muted">#8490A4</Color>
+    <Color x:Key="Color.Accent">#817BFF</Color>
+    <Color x:Key="Color.Accent2">#44CFFF</Color>
+    <Color x:Key="Color.Good">#43D3A4</Color>
+    <Color x:Key="Color.Bad">#FF7082</Color>
+    <Color x:Key="Color.Warn">#F6BC60</Color>
+
+    <SolidColorBrush x:Key="Brush.Bg" Color="{StaticResource Color.Bg}" />
+    <SolidColorBrush x:Key="Brush.Sidebar" Color="{StaticResource Color.Sidebar}" />
+    <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource Color.Surface}" />
+    <SolidColorBrush x:Key="Brush.SurfaceAlt" Color="{StaticResource Color.SurfaceAlt}" />
+    <SolidColorBrush x:Key="Brush.Inset" Color="{StaticResource Color.Inset}" />
+    <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Border}" />
+    <SolidColorBrush x:Key="Brush.BorderSoft" Color="{StaticResource Color.BorderSoft}" />
+    <SolidColorBrush x:Key="Brush.Text" Color="{StaticResource Color.Text}" />
+    <SolidColorBrush x:Key="Brush.TextSoft" Color="{StaticResource Color.TextSoft}" />
+    <SolidColorBrush x:Key="Brush.Muted" Color="{StaticResource Color.Muted}" />
+    <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Accent}" />
+    <SolidColorBrush x:Key="Brush.Accent2" Color="{StaticResource Color.Accent2}" />
+    <SolidColorBrush x:Key="Brush.Good" Color="{StaticResource Color.Good}" />
+    <SolidColorBrush x:Key="Brush.Bad" Color="{StaticResource Color.Bad}" />
+    <SolidColorBrush x:Key="Brush.Warn" Color="{StaticResource Color.Warn}" />
+    <LinearGradientBrush x:Key="Brush.AccentGradient" StartPoint="0%,50%" EndPoint="100%,50%">
+      <GradientStop Offset="0" Color="#817BFF" />
+      <GradientStop Offset="1" Color="#44CFFF" />
+    </LinearGradientBrush>
+  <!-- ════════════════════════════════════════════════════════════════════
+         Собственные ControlTheme: слайдер, комбобокс, тумблер.
+         Имена частей шаблона повторяют Avalonia Fluent 11.2.8
+         (PART_Track, thumb, Background, HighlightBackground, PART_Popup,
+         PART_ItemsPresenter, PART_MovingKnobs, PART_SwitchKnob и т.д.),
+         поэтому поведение контролов сохраняется полностью.
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Slider: горизонтальная «планка» заполнения ────────────────────── -->
+    <ControlTheme x:Key="SyncLed.Slider.BarHorizontal" TargetType="RepeatButton">
+      <Setter Property="IsTabStop" Value="False" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}"
+                  CornerRadius="3"
+                  Height="6"
+                  VerticalAlignment="Center" />
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^ /template/ Border">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12" />
+          </Transitions>
+        </Setter>
+      </Style>
+    </ControlTheme>
+
+    <!-- ── Slider: вертикальная «планка» заполнения ──────────────────────── -->
+    <ControlTheme x:Key="SyncLed.Slider.BarVertical" TargetType="RepeatButton">
+      <Setter Property="IsTabStop" Value="False" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}"
+                  CornerRadius="3"
+                  Width="6"
+                  HorizontalAlignment="Center" />
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^ /template/ Border">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12" />
+          </Transitions>
+        </Setter>
+      </Style>
+    </ControlTheme>
+
+    <!-- ── Slider: бегунок ───────────────────────────────────────────────── -->
+    <ControlTheme x:Key="SyncLed.Slider.Thumb" TargetType="Thumb">
+      <Setter Property="Background" Value="#F4F7FC" />
+      <Setter Property="BorderBrush" Value="#817BFF" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="9"
+                  BoxShadow="0 1 4 0 #59000000" />
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^ /template/ Border">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12" />
+            <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+          </Transitions>
+        </Setter>
+      </Style>
+    </ControlTheme>
+
+    <!-- ── Slider: основная тема ─────────────────────────────────────────── -->
+    <ControlTheme x:Key="SyncLed.Slider" TargetType="Slider">
+      <Setter Property="Background" Value="#242C3E" />
+      <Setter Property="Foreground" Value="{StaticResource Brush.AccentGradient}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="MinHeight" Value="32" />
+      <Style Selector="^:horizontal">
+        <Setter Property="Template">
+          <ControlTemplate>
+            <DataValidationErrors>
+              <Grid x:Name="SliderContainer" Margin="{TemplateBinding Padding}" Background="Transparent">
+                <Grid MinHeight="32">
+                  <Grid.Styles>
+                    <Style Selector="TickBar">
+                      <Setter Property="ReservedSpace" Value="{Binding #PART_Track.Thumb.Bounds}" />
+                    </Style>
+                  </Grid.Styles>
+                  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="Auto,Auto,*">
+                    <TickBar Name="TopTickBar"
+                             Grid.ColumnSpan="3"
+                             Ticks="{TemplateBinding Ticks}"
+                             TickFrequency="{TemplateBinding Slider.TickFrequency}"
+                             Orientation="{TemplateBinding Slider.Orientation}"
+                             Minimum="{TemplateBinding Minimum}"
+                             Maximum="{TemplateBinding Maximum}"
+                             Height="3" Margin="0,0,0,1"
+                             VerticalAlignment="Bottom"
+                             Placement="Top"
+                             IsVisible="False"
+                             Fill="{StaticResource Brush.BorderSoft}" />
+                    <TickBar Name="BottomTickBar"
+                             Grid.Row="2" Grid.ColumnSpan="3"
+                             Ticks="{TemplateBinding Ticks}"
+                             TickFrequency="{TemplateBinding Slider.TickFrequency}"
+                             Orientation="{TemplateBinding Slider.Orientation}"
+                             Minimum="{TemplateBinding Minimum}"
+                             Maximum="{TemplateBinding Maximum}"
+                             Height="3" Margin="0,1,0,0"
+                             VerticalAlignment="Top"
+                             Placement="Bottom"
+                             IsVisible="False"
+                             Fill="{StaticResource Brush.BorderSoft}" />
+                    <Track Name="PART_Track"
+                           Grid.Row="1" Grid.ColumnSpan="3"
+                           Minimum="{TemplateBinding Minimum}"
+                           Maximum="{TemplateBinding Maximum}"
+                           Value="{TemplateBinding Value, Mode=TwoWay}"
+                           IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                           Orientation="Horizontal">
+                      <Track.DecreaseButton>
+                        <RepeatButton Name="PART_DecreaseButton"
+                                      Theme="{StaticResource SyncLed.Slider.BarHorizontal}"
+                                      Background="{TemplateBinding Foreground}"
+                                      Focusable="False" />
+                      </Track.DecreaseButton>
+                      <Track.IncreaseButton>
+                        <RepeatButton Name="PART_IncreaseButton"
+                                      Theme="{StaticResource SyncLed.Slider.BarHorizontal}"
+                                      Background="{TemplateBinding Background}"
+                                      Focusable="False" />
+                      </Track.IncreaseButton>
+                      <Thumb Name="thumb"
+                             Width="18" Height="18"
+                             VerticalAlignment="Center"
+                             Theme="{StaticResource SyncLed.Slider.Thumb}" />
+                    </Track>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </DataValidationErrors>
+          </ControlTemplate>
+        </Setter>
+      </Style>
+      <Style Selector="^:vertical">
+        <Setter Property="Template">
+          <ControlTemplate>
+            <DataValidationErrors>
+              <Grid x:Name="SliderContainer" Margin="{TemplateBinding Padding}" Background="Transparent">
+                <Grid MinWidth="32">
+                  <Grid.Styles>
+                    <Style Selector="TickBar">
+                      <Setter Property="ReservedSpace" Value="{Binding #PART_Track.Thumb.Bounds}" />
+                    </Style>
+                  </Grid.Styles>
+                  <Grid RowDefinitions="*,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                    <TickBar Name="LeftTickBar"
+                             Grid.RowSpan="3"
+                             Ticks="{TemplateBinding Ticks}"
+                             TickFrequency="{TemplateBinding Slider.TickFrequency}"
+                             Orientation="{TemplateBinding Slider.Orientation}"
+                             Minimum="{TemplateBinding Minimum}"
+                             Maximum="{TemplateBinding Maximum}"
+                             Width="3" Margin="0,0,1,0"
+                             HorizontalAlignment="Right"
+                             Placement="Left"
+                             IsVisible="False"
+                             Fill="{StaticResource Brush.BorderSoft}" />
+                    <TickBar Name="RightTickBar"
+                             Grid.Row="2" Grid.Column="2"
+                             Ticks="{TemplateBinding Ticks}"
+                             TickFrequency="{TemplateBinding Slider.TickFrequency}"
+                             Orientation="{TemplateBinding Slider.Orientation}"
+                             Minimum="{TemplateBinding Minimum}"
+                             Maximum="{TemplateBinding Maximum}"
+                             Width="3" Margin="1,0,0,0"
+                             HorizontalAlignment="Left"
+                             Placement="Right"
+                             IsVisible="False"
+                             Fill="{StaticResource Brush.BorderSoft}" />
+                    <Track Name="PART_Track"
+                           Grid.RowSpan="3"
+                           Grid.Column="1"
+                           Minimum="{TemplateBinding Minimum}"
+                           Maximum="{TemplateBinding Maximum}"
+                           Value="{TemplateBinding Value, Mode=TwoWay}"
+                           IsDirectionReversed="{TemplateBinding IsDirectionReversed}"
+                           Orientation="Vertical">
+                      <Track.DecreaseButton>
+                        <RepeatButton Name="PART_DecreaseButton"
+                                      Theme="{StaticResource SyncLed.Slider.BarVertical}"
+                                      Background="{TemplateBinding Foreground}"
+                                      Focusable="False" />
+                      </Track.DecreaseButton>
+                      <Track.IncreaseButton>
+                        <RepeatButton Name="PART_IncreaseButton"
+                                      Theme="{StaticResource SyncLed.Slider.BarVertical}"
+                                      Background="{TemplateBinding Background}"
+                                      Focusable="False" />
+                      </Track.IncreaseButton>
+                      <Thumb Name="SliderThumb"
+                             Width="18" Height="18"
+                             HorizontalAlignment="Center"
+                             Theme="{StaticResource SyncLed.Slider.Thumb}" />
+                    </Track>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </DataValidationErrors>
+          </ControlTemplate>
+        </Setter>
+      </Style>
+
+      <!-- Состояния наведения, нажатия и отключения. -->
+      <Style Selector="^:pointerover /template/ RepeatButton#PART_IncreaseButton">
+        <Setter Property="Background" Value="#303A52" />
+      </Style>
+      <Style Selector="^:pointerover /template/ Thumb">
+        <Setter Property="BorderBrush" Value="#44CFFF" />
+      </Style>
+      <Style Selector="^:pressed /template/ Thumb">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="BorderBrush" Value="#44CFFF" />
+      </Style>
+      <Style Selector="^:disabled">
+        <Setter Property="Background" Value="#161B27" />
+      </Style>
+      <Style Selector="^:disabled /template/ RepeatButton#PART_DecreaseButton">
+        <Setter Property="Background" Value="#2B3145" />
+      </Style>
+      <Style Selector="^:disabled /template/ RepeatButton#PART_IncreaseButton">
+        <Setter Property="Background" Value="#161B27" />
+      </Style>
+      <Style Selector="^:disabled /template/ Thumb">
+        <Setter Property="Background" Value="#6D7791" />
+        <Setter Property="BorderBrush" Value="#525B72" />
+      </Style>
+
+      <!-- Видимость засечек (TickBar), как во Fluent. -->
+      <Style Selector="^[TickPlacement=TopLeft] /template/ TickBar#LeftTickBar, ^[TickPlacement=Outside] /template/ TickBar#LeftTickBar">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^[TickPlacement=TopLeft] /template/ TickBar#TopTickBar, ^[TickPlacement=Outside] /template/ TickBar#TopTickBar">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^[TickPlacement=BottomRight] /template/ TickBar#BottomTickBar, ^[TickPlacement=Outside] /template/ TickBar#BottomTickBar">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^[TickPlacement=BottomRight] /template/ TickBar#RightTickBar, ^[TickPlacement=Outside] /template/ TickBar#RightTickBar">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </ControlTheme>
+
+    <!-- ── ComboBox: тёмный выбранник с шевроном и выпадающим списком ────── -->
+    <ControlTheme x:Key="SyncLed.ComboBox" TargetType="ComboBox">
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+      <Setter Property="FocusAdorner" Value="{x:Null}" />
+      <Setter Property="Background" Value="{StaticResource Brush.SurfaceAlt}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="9" />
+      <Setter Property="Padding" Value="12,0,30,0" />
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="MaxDropDownHeight" Value="320" />
+      <Setter Property="PlaceholderForeground" Value="{StaticResource Brush.Muted}" />
+      <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+      <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <DataValidationErrors>
+            <Grid ColumnDefinitions="*,32">
+              <Border x:Name="Background"
+                      Grid.Column="0" Grid.ColumnSpan="2"
+                      Background="{TemplateBinding Background}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="{TemplateBinding CornerRadius}"
+                      MinWidth="88" />
+              <Border x:Name="HighlightBackground"
+                      Grid.Column="0" Grid.ColumnSpan="2"
+                      Background="Transparent"
+                      BorderBrush="{StaticResource Brush.Accent}"
+                      BorderThickness="1"
+                      CornerRadius="{TemplateBinding CornerRadius}"
+                      IsVisible="False" />
+              <TextBlock x:Name="PlaceholderTextBlock"
+                         Grid.Column="0"
+                         Margin="{TemplateBinding Padding}"
+                         HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                         VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                         Text="{TemplateBinding PlaceholderText}"
+                         Foreground="{TemplateBinding PlaceholderForeground}"
+                         IsVisible="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}" />
+              <ContentControl x:Name="ContentPresenter"
+                              Grid.Column="0"
+                              Margin="{TemplateBinding Padding}"
+                              Content="{TemplateBinding SelectionBoxItem}"
+                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+              <Path x:Name="DropDownGlyph"
+                    Grid.Column="1"
+                    Data="M1,1 L5.5,5.5 L10,1"
+                    StrokeThickness="1.6"
+                    StrokeLineCap="Round"
+                    Width="11" Height="7"
+                    Margin="0,0,14,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsHitTestVisible="False"
+                    RenderTransformOrigin="50%,50%" />
+              <Popup Name="PART_Popup"
+                     WindowManagerAddShadowHint="False"
+                     IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                     MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                     MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                     PlacementTarget="Background"
+                     IsLightDismissEnabled="True"
+                     InheritsTransform="True">
+                <Border x:Name="PopupBorder"
+                        Background="#141A28"
+                        BorderBrush="{StaticResource Brush.Border}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="4"
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Stretch">
+                  <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}">
+                    <ItemsPresenter Name="PART_ItemsPresenter"
+                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
+                  </ScrollViewer>
+                </Border>
+              </Popup>
+            </Grid>
+          </DataValidationErrors>
+        </ControlTemplate>
+      </Setter>
+
+      <Style Selector="^ /template/ Border#Background">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.12" />
+            <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:pointerover /template/ Border#Background">
+        <Setter Property="Background" Value="#212A3C" />
+        <Setter Property="BorderBrush" Value="#3E4C6B" />
+      </Style>
+      <Style Selector="^:pressed /template/ Border#Background">
+        <Setter Property="Background" Value="#171D29" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+      </Style>
+      <Style Selector="^[IsDropDownOpen=true] /template/ Border#Background">
+        <Setter Property="Background" Value="#212A3C" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+      </Style>
+      <Style Selector="^:focus-visible /template/ Border#HighlightBackground">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ Path#DropDownGlyph">
+        <Setter Property="Stroke" Value="{StaticResource Brush.Muted}" />
+      </Style>
+      <Style Selector="^:pointerover /template/ Path#DropDownGlyph">
+        <Setter Property="Stroke" Value="{StaticResource Brush.TextSoft}" />
+      </Style>
+      <Style Selector="^[IsDropDownOpen=true] /template/ Path#DropDownGlyph">
+        <Setter Property="Stroke" Value="{StaticResource Brush.Accent2}" />
+        <Setter Property="RenderTransform">
+          <Setter.Value>
+            <RotateTransform Angle="180" />
+          </Setter.Value>
+        </Setter>
+      </Style>
+      <Style Selector="^:disabled /template/ Border#Background">
+        <Setter Property="Background" Value="#10141D" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}" />
+      </Style>
+      <Style Selector="^:disabled /template/ Path#DropDownGlyph">
+        <Setter Property="Stroke" Value="#5F6A7E" />
+      </Style>
+    </ControlTheme>
+
+    <!-- ── ComboBox: пункты выпадающего списка ───────────────────────────── -->
+    <ControlTheme x:Key="SyncLed.ComboBoxItem" TargetType="ComboBoxItem">
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+      <!-- Фон «прозрачный», но с RGB цвета наведения: ключевое слово Transparent
+           разбирается как #00FFFFFF, и BrushTransition сначала поднимает альфу —
+           из-за этого пункт вспыхивал светло-серым на середине перехода. С тем же
+           RGB анимируется одна только прозрачность: переход плавный, без вспышки. -->
+      <Setter Property="Background" Value="#00232B3E" />
+      <Setter Property="Padding" Value="10,7" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Background="{TemplateBinding Background}"
+                            Foreground="{TemplateBinding Foreground}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^ /template/ ContentPresenter">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.1" />
+            <BrushTransition Property="Foreground" Duration="0:0:0.1" />
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#232B3E" />
+        <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+      </Style>
+      <Style Selector="^:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#2B3549" />
+      </Style>
+      <Style Selector="^:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="#2E2B5C" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+      </Style>
+      <Style Selector="^:selected:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#3A3770" />
+      </Style>
+      <Style Selector="^:selected:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#45419A" />
+      </Style>
+      <Style Selector="^:disabled /template/ ContentPresenter">
+        <Setter Property="Background" Value="#00232B3E" />
+        <Setter Property="Foreground" Value="#5F6A7E" />
+      </Style>
+    </ControlTheme>
+
+    <!-- ── ToggleSwitch: скруглённый трек, градиентное «включено» ────────── -->
+    <ControlTheme x:Key="SyncLed.ToggleSwitch" TargetType="ToggleSwitch">
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="KnobTransitions">
+        <Transitions>
+          <DoubleTransition Easing="CubicEaseOut"
+                            Property="Canvas.Left"
+                            Duration="0:0:0.14" />
+        </Transitions>
+      </Setter>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid Background="{TemplateBinding Background}" RowDefinitions="Auto,*">
+
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Grid.Row="0"
+                              VerticalAlignment="Top"
+                              Margin="0,0,0,4"
+                              RecognizesAccessKey="True"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+
+            <Grid Grid.Row="1"
+                  MinWidth="40"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="5" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="5" />
+              </Grid.RowDefinitions>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="12" MaxWidth="12" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <Grid x:Name="SwitchAreaGrid"
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="3"
+                    Background="Transparent"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+
+              <ContentPresenter x:Name="PART_OffContentPresenter"
+                                Grid.RowSpan="3"
+                                Grid.Column="2"
+                                Foreground="{StaticResource Brush.Muted}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding OffContent}"
+                                ContentTemplate="{TemplateBinding OffContentTemplate}" />
+
+              <ContentPresenter x:Name="PART_OnContentPresenter"
+                                Grid.RowSpan="3"
+                                Grid.Column="2"
+                                Foreground="#A9A5FF"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding OnContent}"
+                                ContentTemplate="{TemplateBinding OnContentTemplate}" />
+
+              <Border x:Name="OuterBorder"
+                      Grid.Row="1" Grid.Column="0"
+                      Width="40" Height="20"
+                      Background="#232B3D"
+                      BorderBrush="#3E4C6B"
+                      BorderThickness="1"
+                      CornerRadius="10" />
+
+              <Border x:Name="SwitchKnobBounds"
+                      Grid.Row="1" Grid.Column="0"
+                      Width="40" Height="20"
+                      Background="{StaticResource Brush.AccentGradient}"
+                      BorderBrush="#A7A4FF"
+                      BorderThickness="1"
+                      CornerRadius="10"
+                      Opacity="0" />
+
+              <Canvas x:Name="PART_SwitchKnob"
+                      Grid.Row="1" Grid.Column="0"
+                      Width="20" Height="20"
+                      HorizontalAlignment="Left">
+                <Grid x:Name="PART_MovingKnobs" Width="20" Height="20">
+                  <Ellipse x:Name="SwitchKnobOn"
+                           Fill="White"
+                           Width="14" Height="14" />
+                  <Ellipse x:Name="SwitchKnobOff"
+                           Fill="#96A0B8"
+                           Width="14" Height="14" />
+                </Grid>
+              </Canvas>
+            </Grid>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter:empty">
+        <Setter Property="Margin" Value="0" />
+      </Style>
+
+      <!-- Скромные переходы заливки/рамки/прозрачности. -->
+      <Style Selector="^ /template/ Border#OuterBorder, ^ /template/ Border#SwitchKnobBounds">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Background" Duration="0:0:0.14" />
+            <BrushTransition Property="BorderBrush" Duration="0:0:0.14" />
+            <DoubleTransition Property="Opacity" Duration="0:0:0.14" />
+          </Transitions>
+        </Setter>
+      </Style>
+      <Style Selector="^ /template/ Ellipse#SwitchKnobOn, ^ /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Transitions">
+          <Transitions>
+            <BrushTransition Property="Fill" Duration="0:0:0.14" />
+            <DoubleTransition Property="Opacity" Duration="0:0:0.12" />
+          </Transitions>
+        </Setter>
+      </Style>
+
+      <!-- Наведение. -->
+      <Style Selector="^:pointerover /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="#2B3549" />
+        <Setter Property="BorderBrush" Value="#4E5D82" />
+      </Style>
+      <Style Selector="^:pointerover /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Fill" Value="#B7C0D0" />
+      </Style>
+      <Style Selector="^:pointerover /template/ Border#SwitchKnobBounds">
+        <Setter Property="BorderBrush" Value="#C9C7FF" />
+      </Style>
+
+      <!-- Нажатие. -->
+      <Style Selector="^:pressed /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="#313D57" />
+        <Setter Property="BorderBrush" Value="#5A6B94" />
+      </Style>
+      <Style Selector="^:pressed /template/ Border#SwitchKnobBounds">
+        <Setter Property="BorderBrush" Value="#7C77FF" />
+      </Style>
+      <Style Selector="^:pressed /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Fill" Value="#E9E8FF" />
+      </Style>
+
+      <!-- Отключено. -->
+      <Style Selector="^:disabled">
+        <Setter Property="Foreground" Value="#5F6A7E" />
+      </Style>
+      <Style Selector="^:disabled /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="#161B26" />
+        <Setter Property="BorderBrush" Value="#242C3D" />
+      </Style>
+      <Style Selector="^:disabled /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Fill" Value="#5A6376" />
+      </Style>
+      <Style Selector="^:disabled /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Fill" Value="#A8A5D8" />
+      </Style>
+      <Style Selector="^:disabled /template/ Border#SwitchKnobBounds">
+        <Setter Property="BorderBrush" Value="#4A4779" />
+      </Style>
+
+      <!-- Включено: перекрываем состояния поверх тёмного трека. -->
+      <Style Selector="^:checked /template/ Border#OuterBorder">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+      <Style Selector="^:checked /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+      <Style Selector="^:checked /template/ Border#SwitchKnobBounds">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^:checked /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^:checked /template/ ContentPresenter#PART_OffContentPresenter">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+      <Style Selector="^:checked /template/ ContentPresenter#PART_OnContentPresenter">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+
+      <!-- Выключено. -->
+      <Style Selector="^:unchecked /template/ Border#OuterBorder">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^:unchecked /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^:unchecked /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+      <Style Selector="^:unchecked /template/ Border#SwitchKnobBounds">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+      <Style Selector="^:unchecked /template/ ContentPresenter#PART_OffContentPresenter">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^:unchecked /template/ ContentPresenter#PART_OnContentPresenter">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+    </ControlTheme>
+
+  </Styles.Resources>
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource Brush.Bg}" />
+    <Setter Property="FontFamily" Value="Segoe UI" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+    <Setter Property="UseLayoutRounding" Value="True" />
+  </Style>
+
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+  </Style>
+
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{StaticResource Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="16" />
+  </Style>
+
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{StaticResource Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="18" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.14" />
+        <BrushTransition Property="Background" Duration="0:0:0.14" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- Мягкая подсветка карточки и панели при наведении. -->
+  <Style Selector="Border.card:pointerover">
+    <Setter Property="BorderBrush" Value="#33405C" />
+    <Setter Property="Background" Value="#141926" />
+  </Style>
+
+  <!-- Карточка при перетаскивании: «приподнята» над остальными мягкой тенью. -->
+  <Style Selector="Border.card.dragging">
+    <Setter Property="Background" Value="#161C2B" />
+    <Setter Property="BorderBrush" Value="#46577E" />
+    <Setter Property="BoxShadow" Value="0 8 26 2 #73000000" />
+  </Style>
+
+  <!-- Ручка перетаскивания карточки (⠿ — шесть векторных точек). -->
+  <Style Selector="Button.dragHandle">
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="26" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Muted}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Cursor" Value="SizeAll" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="ToolTip.Tip" Value="Перетащите, чтобы изменить порядок лент" />
+  </Style>
+  <Style Selector="Button.dragHandle /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.dragHandle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#222B3E" />
+  </Style>
+  <Style Selector="Button.dragHandle:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#2B3549" />
+  </Style>
+  <Style Selector="Button.dragHandle Ellipse">
+    <Setter Property="Fill" Value="{Binding $parent[Button].Foreground}" />
+  </Style>
+  <Style Selector="Button.dragHandle:pointerover Ellipse">
+    <Setter Property="Fill" Value="{StaticResource Brush.TextSoft}" />
+  </Style>
+
+  <Style Selector="Border.inset">
+    <Setter Property="Background" Value="{StaticResource Brush.Inset}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+  </Style>
+
+  <Style Selector="Button">
+    <Setter Property="FontFamily" Value="Segoe UI" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
+  <Style Selector="Button.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="14,0" />
+    <Setter Property="Width" Value="184" />
+    <Setter Property="MinWidth" Value="184" />
+    <Setter Property="MaxWidth" Value="184" />
+    <Setter Property="Height" Value="42" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+  </Style>
+  <Style Selector="Button.nav /template/ ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{Binding $parent[Button].BorderThickness}" />
+    <Setter Property="CornerRadius" Value="11" />
+    <Setter Property="Padding" Value="{Binding $parent[Button].Padding}" />
+  </Style>
+  <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#171E2A" />
+  </Style>
+  <Style Selector="Button.nav.accent /template/ ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource Brush.AccentGradient}" />
+  </Style>
+  <Style Selector="Button.nav.accent">
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Height" Value="40" />
+    <Setter Property="MinWidth" Value="118" />
+    <Setter Property="Padding" Value="18,0" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Background" Value="{StaticResource Brush.AccentGradient}" />
+    <Setter Property="BorderBrush" Value="#A7A4FF" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector="Button.primary /template/ ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{Binding $parent[Button].BorderThickness}" />
+    <Setter Property="CornerRadius" Value="11" />
+    <Setter Property="Padding" Value="{Binding $parent[Button].Padding}" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource Brush.AccentGradient}" />
+    <Setter Property="BorderBrush" Value="#C9C7FF" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource Brush.AccentGradient}" />
+    <Setter Property="BorderBrush" Value="#7C77FF" />
+  </Style>
+
+  <Style Selector="Button.ghost">
+    <Setter Property="Height" Value="40" />
+    <Setter Property="MinWidth" Value="112" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="Background" Value="#171D29" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderSoft}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#202838" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+  </Style>
+  <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#202838" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+  </Style>
+  <Style Selector="Button.ghost:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+  </Style>
+  <Style Selector="Button.ghost /template/ ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{Binding $parent[Button].BorderThickness}" />
+    <Setter Property="CornerRadius" Value="11" />
+    <Setter Property="Padding" Value="{Binding $parent[Button].Padding}" />
+  </Style>
+
+  <Style Selector="Button.icon">
+    <Setter Property="Width" Value="34" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="#171D29" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Button.icon /template/ ContentPresenter">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[Button].BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{Binding $parent[Button].BorderThickness}" />
+    <Setter Property="CornerRadius" Value="10" />
+  </Style>
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#212A3C" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+  </Style>
+
+  <!-- Компактная иконка-кнопка (карандаш, звезда) внутри карточки ленты. -->
+  <Style Selector="Button.iconSm">
+    <Setter Property="Width" Value="26" />
+    <Setter Property="Height" Value="26" />
+    <Setter Property="MinWidth" Value="26" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Muted}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.iconSm /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="Button.iconSm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#222B3E" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+  </Style>
+  <Style Selector="Button.iconSm:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#2B3549" />
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{StaticResource Brush.SurfaceAlt}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+    <Setter Property="SelectionBrush" Value="{StaticResource Brush.Accent}" />
+    <Setter Property="CaretBrush" Value="{StaticResource Brush.Text}" />
+    <Setter Property="CornerRadius" Value="9" />
+    <Setter Property="Padding" Value="10,6" />
+  </Style>
+  <!-- Плавные переходы рамки при наведении и фокусе. -->
+  <Style Selector="TextBox /template/ Border#PART_BorderElement">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.12" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="#212A3C" />
+    <Setter Property="BorderBrush" Value="#3E4C6B" />
+  </Style>
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="#141A28" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+  </Style>
+
+  <!-- Числовые поля: единая высота, подсветка рамки при наведении и фокусе. -->
+  <Style Selector="NumericUpDown">
+    <Setter Property="Height" Value="34" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+    <Setter Property="Background" Value="{StaticResource Brush.SurfaceAlt}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="9" />
+    <Setter Property="Padding" Value="9,5" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.12" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.12" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="NumericUpDown:pointerover">
+    <Setter Property="Background" Value="#212A3C" />
+    <Setter Property="BorderBrush" Value="#3E4C6B" />
+  </Style>
+  <Style Selector="NumericUpDown:focus-within">
+    <Setter Property="Background" Value="#141A28" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+  </Style>
+  <!-- Внутреннее поле прозрачно, чтобы состояния внешней рамки были видны. -->
+  <Style Selector="NumericUpDown /template/ TextBox#PART_TextBox">
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+    <Setter Property="SelectionBrush" Value="{StaticResource Brush.Accent}" />
+  </Style>
+  <Style Selector="NumericUpDown /template/ TextBox#PART_TextBox:pointerover /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="NumericUpDown /template/ TextBox#PART_TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+
+  <!-- Комбобокс и слайдер используют собственные ControlTheme из этого файла
+       (см. «SyncLed.ComboBox», «SyncLed.Slider» ниже): тёмные поверхности,
+       скругления 9px, акцентные состояния фокуса и наведения. -->
+  <Style Selector="ComboBox">
+    <Setter Property="Theme" Value="{StaticResource SyncLed.ComboBox}" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="CornerRadius" Value="9" />
+    <Setter Property="Padding" Value="12,0,30,0" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="ComboBoxItem">
+    <Setter Property="Theme" Value="{StaticResource SyncLed.ComboBoxItem}" />
+  </Style>
+
+  <Style Selector="ToggleSwitch">
+    <Setter Property="Theme" Value="{StaticResource SyncLed.ToggleSwitch}" />
+  </Style>
+
+  <Style Selector="CheckBox">
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextSoft}" />
+  </Style>
+
+  <Style Selector="Slider">
+    <Setter Property="Theme" Value="{StaticResource SyncLed.Slider}" />
+  </Style>
+
+  <Style Selector="ScrollViewer">
+    <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+  </Style>
+
+  </Styles>

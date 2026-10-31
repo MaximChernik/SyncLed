@@ -1,0 +1,160 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:SyncLed.Avalonia.Views"
+        x:Class="SyncLed.Avalonia.Views.CustomColorWindow"
+        Title="Свой цвет"
+        Width="364"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        SystemDecorations="None"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Brush.Surface}"
+        KeyDown="OnWindowKeyDown">
+
+  <Window.Styles>
+    <Style Selector="TextBlock.sectionTitle">
+      <Setter Property="FontSize" Value="10.5"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="0.9"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="TextBlock.field">
+      <Setter Property="FontSize" Value="9.5"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="LetterSpacing" Value="0.7"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.Muted}"/>
+      <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+    <Style Selector="TextBlock.hsvTag">
+      <Setter Property="FontSize" Value="10.5"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <!-- Значение канала: тот же цвет, что и подпись канала. -->
+    <Style Selector="TextBlock.hsvValue">
+      <Setter Property="FontSize" Value="11.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontFamily" Value="Consolas"/>
+      <Setter Property="HorizontalAlignment" Value="Right"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Grid.channelRow">
+      <Setter Property="Margin" Value="0,1"/>
+    </Style>
+    <Style Selector="TextBlock.hexValue">
+      <Setter Property="FontSize" Value="19"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontFamily" Value="Consolas"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="40,*">
+
+    <!-- ── заголовочная панель окна ─────────────────────────────────────── -->
+    <views:WindowChrome Grid.Row="0"
+                        Title="Свой цвет"
+                        ShowMinimize="False"
+                        ShowMaximize="False"/>
+
+    <StackPanel Grid.Row="1" Margin="20,14" Spacing="14">
+
+      <Grid ColumnDefinitions="Auto,*">
+        <TextBlock Classes="sectionTitle" Text="СВОЙ ЦВЕТ"/>
+        <Border Grid.Column="1" Classes="inset" Height="1" Margin="12,0,0,0" VerticalAlignment="Center"/>
+      </Grid>
+
+      <!-- предпросмотр выбранного цвета -->
+      <Border x:Name="Preview" Classes="inset" Height="84">
+        <TextBlock x:Name="PreviewHex" Classes="hexValue" Text="#FFFFFF"/>
+      </Border>
+
+      <!-- каналы HSV: оттенок 0–360°, насыщенность и яркость 0–100 % -->
+      <StackPanel Spacing="6">
+        <TextBlock Classes="field" Text="HSV"/>
+
+        <Grid Classes="channelRow" ColumnDefinitions="18,*,52">
+          <TextBlock Classes="hsvTag" Text="H" Foreground="#FF9A6E"/>
+          <Slider x:Name="HSlider"
+                  Grid.Column="1"
+                  Minimum="0" Maximum="360"
+                  SmallChange="1" LargeChange="15"
+                  ValueChanged="OnChannelChanged"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Оттенок, °"/>
+          <TextBlock x:Name="HValue"
+                     Grid.Column="2"
+                     Classes="hsvValue"
+                     Text="0°"
+                     Foreground="#FF9A6E"
+                     Margin="8,0,0,0"/>
+        </Grid>
+
+        <Grid Classes="channelRow" ColumnDefinitions="18,*,52">
+          <TextBlock Classes="hsvTag" Text="S" Foreground="#60E09E"/>
+          <Slider x:Name="SSlider"
+                  Grid.Column="1"
+                  Minimum="0" Maximum="100"
+                  SmallChange="1" LargeChange="10"
+                  ValueChanged="OnChannelChanged"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Насыщенность, %"/>
+          <TextBlock x:Name="SValue"
+                     Grid.Column="2"
+                     Classes="hsvValue"
+                     Text="0%"
+                     Foreground="#60E09E"
+                     Margin="8,0,0,0"/>
+        </Grid>
+
+        <Grid Classes="channelRow" ColumnDefinitions="18,*,52">
+          <TextBlock Classes="hsvTag" Text="V" Foreground="#74A8FF"/>
+          <Slider x:Name="VSlider"
+                  Grid.Column="1"
+                  Minimum="0" Maximum="100"
+                  SmallChange="1" LargeChange="10"
+                  ValueChanged="OnChannelChanged"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Яркость, %"/>
+          <TextBlock x:Name="VValue"
+                     Grid.Column="2"
+                     Classes="hsvValue"
+                     Text="100%"
+                     Foreground="#74A8FF"
+                     Margin="8,0,0,0"/>
+        </Grid>
+      </StackPanel>
+
+      <!-- HEX -->
+      <StackPanel Spacing="6">
+        <TextBlock Classes="field" Text="HEX"/>
+        <TextBox x:Name="HexBox"
+                 Text="#FFFFFF"
+                 Watermark="#RRGGBB"
+                 MaxLength="7"
+                 FontFamily="Consolas"
+                 TextAlignment="Center"
+                 TextChanged="OnHexTextChanged"/>
+      </StackPanel>
+
+      <TextBlock Classes="field" Text="ENTER — ПРИМЕНИТЬ · ESC — ОТМЕНА" Margin="0,2,0,0"/>
+
+      <Grid ColumnDefinitions="*,10,*">
+        <Button Grid.Column="0"
+                Classes="ghost"
+                Content="Отмена"
+                HorizontalAlignment="Stretch"
+                Click="OnCancelClick"/>
+        <Button Grid.Column="2"
+                Classes="primary"
+                Content="ОК"
+                HorizontalAlignment="Stretch"
+                Click="OnOkClick"/>
+      </Grid>
+    </StackPanel>
+  </Grid>
+</Window>
