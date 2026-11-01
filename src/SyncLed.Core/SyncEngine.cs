@@ -76,6 +76,13 @@ public sealed class SyncEngine : IDisposable
     private int _fpsWindowFrames;
     private double _lastFrameMs;
 
+    /// <summary>
+    /// Потолок изменения одного канала за кадр: резкая смена изображения
+    /// (склейка сцен, всполох, смена фона) доезжает до ленты примерно за
+    /// 0.2 с, а не приходит одним ударом «чистого» RGB-цвета.
+    /// </summary>
+    private const int MaxChannelStep = 36;
+
     public event Action<string>? Log;
 
     public bool IsRunning => _running;
@@ -689,22 +696,40 @@ public sealed class SyncEngine : IDisposable
 
     private List<Rgb> Smooth(Runtime rt, List<Rgb> target, int smoothing)
     {
-        if (rt.Previous.Count != target.Count || smoothing <= 0)
+        if (rt.Previous.Count != target.Count)
         {
             rt.Previous = new List<Rgb>(target);
             return target;
         }
 
-        double alpha = 1.0 - smoothing / 100.0;
+        double alpha = smoothing <= 0 ? 1.0 : 1.0 - smoothing / 100.0;
         var result = new List<Rgb>(target.Count);
         for (int i = 0; i < target.Count; i++)
         {
-            Rgb c = ColorUtil.Lerp(rt.Previous[i], target[i], alpha);
-            if (target[i].Max == 0) c = Rgb.Black;
-            result.Add(c);
+            Rgb blended = ColorUtil.Lerp(rt.Previous[i], target[i], alpha);
+            result.Add(LimitStep(rt.Previous[i], blended));
         }
         rt.Previous = result;
         return result;
+    }
+
+    /// <summary>
+    /// Ограничивает скачок канала за один кадр. Смягчение работает в обе
+    /// стороны: вспышка на экране разгоняется постепенно, и потемнение тоже
+    /// гаснет за несколько кадров, а не мгновенно — без стробоскопа при
+    /// быстрой смене изображения.
+    /// </summary>
+    private static Rgb LimitStep(Rgb previous, Rgb next) => new(
+        Step(previous.R, next.R),
+        Step(previous.G, next.G),
+        Step(previous.B, next.B));
+
+    private static byte Step(byte from, byte to)
+    {
+        int delta = to - from;
+        if (delta > MaxChannelStep) return (byte)(from + MaxChannelStep);
+        if (delta < -MaxChannelStep) return (byte)(from - MaxChannelStep);
+        return to;
     }
 
     /// <summary>
