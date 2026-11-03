@@ -54,6 +54,8 @@ public sealed class SyncEngine : IDisposable
         public DateTime LastStaticSend = DateTime.MinValue;
         public Rgb LastStaticColor = new(255, 255, 255);
         public DateTime LastErrorLog = DateTime.MinValue;
+        /// <summary>Когда каждое сообщение об ошибке показывалось в последний раз.</summary>
+        public readonly Dictionary<string, DateTime> RecentErrors = new();
         public DateTime TestUntil = DateTime.MinValue;
         public int OpenFailures;
         // Применённое состояние флажка «Лента включена»: null — ещё не проверяли.
@@ -439,9 +441,10 @@ public sealed class SyncEngine : IDisposable
             {
                 // Проблемная лента не должна останавливать вторую.
                 rt.Previous.Clear();
-                if ((DateTime.UtcNow - rt.LastErrorLog).TotalSeconds > 5)
+
+                if (ShouldLogError(rt, ex.Message, perMessageSeconds: 120,
+                        globalGapSeconds: 5, DateTime.UtcNow))
                 {
-                    rt.LastErrorLog = DateTime.UtcNow;
                     EmitLog($"{AppConfig.DisplayName(rt.Config, rt.Strip.Title)}: {ex.Message}");
                 }
             }
@@ -774,12 +777,34 @@ public sealed class SyncEngine : IDisposable
         }
 
         rt.OpenFailures++;
-        if ((now - rt.LastErrorLog).TotalSeconds > 10)
+        var message = rt.Strip.LastError ?? "нет связи";
+        if (ShouldLogError(rt, message, perMessageSeconds: 120,
+                globalGapSeconds: 10, DateTime.UtcNow))
         {
-            rt.LastErrorLog = now;
-            EmitLog($"{AppConfig.DisplayName(rt.Config, rt.Strip.Title)}: {rt.Strip.LastError ?? "нет связи"}");
+            EmitLog($"{AppConfig.DisplayName(rt.Config, rt.Strip.Title)}: {message}");
         }
         return false;
+    }
+
+    /// <summary>
+    /// Решает, можно ли показать сообщение об ошибке ленты в журнале.
+    /// Отвалившееся устройство стучится каждые секунды (обычно с одним и тем же
+    /// текстом, но может и с чередующимися), поэтому одно и то же сообщение
+    /// показывается не чаще раза в <paramref name="perMessageSeconds"/>, а любое —
+    /// не чаще, чем раз в <paramref name="globalGapSeconds"/> в целом. Без этого
+    /// журнал целиком забивается одной строкой и теряется история событий.
+    /// </summary>
+    private static bool ShouldLogError(Runtime rt, string message,
+        double perMessageSeconds, int globalGapSeconds, DateTime now)
+    {
+        if (rt.RecentErrors.Count > 16) rt.RecentErrors.Clear();
+        rt.RecentErrors.TryGetValue(message, out var lastShown);
+        if (now - lastShown <= TimeSpan.FromSeconds(perMessageSeconds)) return false;
+        if ((now - rt.LastErrorLog).TotalSeconds <= globalGapSeconds) return false;
+
+        rt.RecentErrors[message] = now;
+        rt.LastErrorLog = now;
+        return true;
     }
 
     private void EmitLog(string message)
