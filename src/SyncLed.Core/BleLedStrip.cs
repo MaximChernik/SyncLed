@@ -113,6 +113,15 @@ public sealed class BleLedStrip : ILedStrip
     public bool IsOpen => _isOpen;
     public string? LastError { get; internal set; }
 
+    /// <summary>
+    /// Журнал приложения: срабатывания защиты по току и другие события, которые
+    /// иначе остаются незаметными (лента просто гаснет, а причины не видно).
+    /// </summary>
+    public event Action<string>? Log;
+
+    private long _lastProtectionLogMs = long.MinValue;
+    private const int ProtectionLogIntervalMs = 120_000;
+
     private static string ShortPathHash(string path)
     {
         uint hash = 2166136261;
@@ -283,6 +292,26 @@ public sealed class BleLedStrip : ILedStrip
         _isOpen = false;
     }
 
+    /// <summary>
+    /// Сообщает в журнал, что лента погасла из-за защиты по току. Событие может
+    /// повторяться каждую секунду, поэтому в журнал попадает раз в две минуты:
+    /// иначе причина «лента выключилась» осталась бы незаметной.
+    /// </summary>
+    private void NoteProtection(long stamp)
+    {
+        if (stamp - _lastProtectionLogMs < ProtectionLogIntervalMs) return;
+        _lastProtectionLogMs = stamp;
+        try
+        {
+            Log?.Invoke($"{Title}: лента погасла — контроллер ушёл в защиту по току " +
+                        $"(аппаратная яркость {HardwareBrightness}%), повторяю включение");
+        }
+        catch
+        {
+            // Журнал не должен ломать отправку цвета.
+        }
+    }
+
     public void Close()
     {
         lock (_sync) CloseCore();
@@ -395,6 +424,7 @@ public sealed class BleLedStrip : ILedStrip
             // с нарастающей паузой, чтобы не устраивать мигание каждую секунду.
             if (_stripOff && color.Max > 0 && stamp >= _nextPowerOnTicks)
             {
+                NoteProtection(stamp);
                 WriteRaw(_writeChar, Pack(CmdPower, 0x01));
                 WriteRaw(_writeChar, Pack(CmdMode, ModeColor, 0x01));
                 _appliedBrightness = -1;

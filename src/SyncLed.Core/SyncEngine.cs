@@ -96,7 +96,12 @@ public sealed class SyncEngine : IDisposable
         {
             var device = config.GetOrCreateDevice(strip.Key, strip.ProductId, strip.LampCount, strip.PathHash);
             if (strip is BleLedStrip ble)
+            {
                 ble.HardwareBrightness = config.ResolveHardwareBrightness(device);
+                // События защиты по току идут напрямую в журнал приложения.
+                ble.Log -= EmitLog;
+                ble.Log += EmitLog;
+            }
 
             _runtimes.Add(new Runtime
             {
