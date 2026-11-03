@@ -632,7 +632,7 @@ public sealed class SyncEngine : IDisposable
         var target = new List<Rgb>(orderedZones.Count);
         foreach (var zone in orderedZones)
         {
-            Rgb raw = sampler.Average(pixels, zone);
+            Rgb raw = sampler.Median(pixels, zone);
             if (raw.Max < settings.BlackThreshold) raw = Rgb.Black;
             target.Add(ColorUtil.Process(raw, brightness, saturation, gamma, gainR, gainG, gainB));
         }

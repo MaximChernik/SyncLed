@@ -106,57 +106,55 @@ public sealed class FrameSampler : IDisposable
         return _pixels;
     }
 
-    /// <summary>Средний цвет прямоугольника (BGRA-буфер).</summary>
-    public Rgb Average(byte[] pixels, Rectangle rect)
+    /// <summary>
+    /// Медиана по каждому каналу вместо среднего арифметического. Мелкий
+    /// яркий элемент (курсор, иконка, уведомление, бегущая строка), занимающий
+    /// меньше половины зоны, не сдвигает её цвет — лента не мерцает от мелочей.
+    /// Полноценная смена картинки проходит как есть: медиана следует за
+    /// большинством пикселей зоны.
+    /// </summary>
+    public Rgb Median(byte[] pixels, Rectangle rect)
     {
         int x0 = Math.Clamp(rect.Left, 0, Width);
         int y0 = Math.Clamp(rect.Top, 0, Height);
         int x1 = Math.Clamp(rect.Right, x0 + 1, Width);
         int y1 = Math.Clamp(rect.Bottom, y0 + 1, Height);
 
-        long b = 0, g = 0, r = 0;
-        int count = 0;
+        int count = (x1 - x0) * (y1 - y0);
+        if (count <= 0) return Rgb.Black;
+
+        // Обычные зоны — сотни пикселей, укладываются в стек; большие
+        // (при малом числе LED) уходят в кучу, чтобы не резать стек потока.
+        Span<byte> rs = count <= 4096 ? stackalloc byte[count] : new byte[count];
+        Span<byte> gs = count <= 4096 ? stackalloc byte[count] : new byte[count];
+        Span<byte> bs = count <= 4096 ? stackalloc byte[count] : new byte[count];
+
+        int i = 0;
         for (int y = y0; y < y1; y++)
         {
             int row = y * _stride;
             for (int x = x0; x < x1; x++)
             {
                 int o = row + x * 4;
-                b += pixels[o];
-                g += pixels[o + 1];
-                r += pixels[o + 2];
-                count++;
+                bs[i] = pixels[o];
+                gs[i] = pixels[o + 1];
+                rs[i] = pixels[o + 2];
+                i++;
             }
         }
-        if (count == 0) return Rgb.Black;
-        return new Rgb((byte)(r / count), (byte)(g / count), (byte)(b / count));
+
+        rs.Sort();
+        gs.Sort();
+        bs.Sort();
+        return new Rgb(Middle(rs), Middle(gs), Middle(bs));
     }
 
-    public Rgb Average(byte[] pixels, IEnumerable<Rectangle> rects)
+    private static byte Middle(Span<byte> sorted)
     {
-        long b = 0, g = 0, r = 0;
-        int count = 0;
-        foreach (var rect in rects)
-        {
-            int x0 = Math.Clamp(rect.Left, 0, Width);
-            int y0 = Math.Clamp(rect.Top, 0, Height);
-            int x1 = Math.Clamp(rect.Right, x0 + 1, Width);
-            int y1 = Math.Clamp(rect.Bottom, y0 + 1, Height);
-            for (int y = y0; y < y1; y++)
-            {
-                int row = y * _stride;
-                for (int x = x0; x < x1; x++)
-                {
-                    int o = row + x * 4;
-                    b += pixels[o];
-                    g += pixels[o + 1];
-                    r += pixels[o + 2];
-                    count++;
-                }
-            }
-        }
-        if (count == 0) return Rgb.Black;
-        return new Rgb((byte)(r / count), (byte)(g / count), (byte)(b / count));
+        int n = sorted.Length;
+        return n % 2 == 1
+            ? sorted[n / 2]
+            : (byte)((sorted[n / 2 - 1] + sorted[n / 2]) / 2);
     }
 
     public void Dispose()
