@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Win32;
 
 namespace SyncLed;
 
@@ -59,9 +60,13 @@ public static class Monitors
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern bool GetMonitorInfo(IntPtr monitor, ref MONITORINFOEX info);
 
+    /// <summary>Данные монитора из EDID: имя модели и серийный номер.</summary>
+    private sealed record EdidInfo(string Name, string Serial);
+
     public static List<MonitorChoice> All()
     {
-        var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var titles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var serials = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         var dd = new DISPLAY_DEVICE { cb = Marshal.SizeOf<DISPLAY_DEVICE>() };
         for (uint i = 0; EnumDisplayDevices(null, i, ref dd, 0); i++)
@@ -71,18 +76,33 @@ public static class Monitors
 
             string key = dd.DeviceName;
             string title = dd.DeviceString;
+            string serial = "";
 
             var mon = new DISPLAY_DEVICE { cb = Marshal.SizeOf<DISPLAY_DEVICE>() };
             if (EnumDisplayDevices(key, 0, ref mon, 1))
             {
                 string m = mon.DeviceString?.Trim() ?? "";
-                if (m.Length > 0 && !m.Contains("Generic", StringComparison.OrdinalIgnoreCase) &&
-                    !m.Contains("Универсальный", StringComparison.OrdinalIgnoreCase))
-                    title = m;
-                else if (m.Length > 0)
-                    title = m; // "Generic Monitor (XG27ACS)" тоже информативно
+
+                // Имя из EDID («LG ULTRAWIDE», «DELL U2720Q») — читаемое и,
+                // главное, стабильное: DISPLAY11 меняется от перезагрузки к
+                // перезагрузке, а EDID-имя живёт в самом мониторе.
+                var edid = ReadEdid(mon.DeviceID);
+                if (edid != null && edid.Name.Length > 0)
+                {
+                    title = edid.Name;
+                    serial = edid.Serial;
+                }
+                else
+                {
+                    // EDID не отдал имя — код модели из пути устройства
+                    // (DEL4098, GSM59A8): он тоже стабильнее, чем DISPLAYxx.
+                    string model = MonitorModel(mon.DeviceID);
+                    if (model.Length > 0) title = model;
+                    else if (m.Length > 0) title = m;
+                }
             }
-            names[key] = title;
+            titles[key] = title;
+            serials[key] = serial;
         }
 
         var list = new List<MonitorChoice>();
@@ -92,7 +112,7 @@ public static class Monitors
             if (!GetMonitorInfo(monitor, ref info)) return true;
 
             string device = info.DeviceName;
-            string title = names.TryGetValue(device, out string? n) && !string.IsNullOrWhiteSpace(n) ? n : device;
+            string title = titles.TryGetValue(device, out string? n) && !string.IsNullOrWhiteSpace(n) ? n : device;
             list.Add(new MonitorChoice(
                 device,
                 title,
@@ -108,7 +128,9 @@ public static class Monitors
             .ThenBy(m => m.Bounds.Y)
             .ToList();
 
-        // Одинаковые «Generic PnP Monitor» различаем именем вывода Windows.
+        // Одинаковые названия различаем: сначала серийным номером из EDID
+        // (стабилен между перезагрузками), и только если его нет — именем
+        // вывода Windows (DISPLAY11).
         foreach (var group in ordered.GroupBy(m => m.Title, StringComparer.OrdinalIgnoreCase))
         {
             var duplicates = group.ToList();
@@ -116,12 +138,94 @@ public static class Monitors
             foreach (var monitor in duplicates)
             {
                 int index = ordered.IndexOf(monitor);
-                string output = monitor.DeviceName.Replace("\\\\.\\", "");
-                ordered[index] = monitor with { Title = $"{output} · {monitor.Title}" };
+                string serial = serials.TryGetValue(monitor.DeviceName, out var s) ? s : "";
+                bool uniqueSerial = serial.Length > 0 && duplicates.Count(d =>
+                    serials.TryGetValue(d.DeviceName, out var other) && other == serial) == 1;
+                string suffix = uniqueSerial
+                    ? "S/N " + serial
+                    : monitor.DeviceName.Replace("\\\\.\\", "");
+                ordered[index] = monitor with { Title = $"{monitor.Title} · {suffix}" };
             }
         }
 
         return ordered;
+    }
+
+    /// <summary>Код модели из DeviceID монитора: DISPLAY#AUS27FE#… → AUS27FE.</summary>
+    private static string MonitorModel(string monitorDeviceId)
+    {
+        string[] parts = SplitDeviceId(monitorDeviceId);
+        return parts.Length >= 3 &&
+               parts[0].Equals("DISPLAY", StringComparison.OrdinalIgnoreCase)
+            ? parts[1]
+            : "";
+    }
+
+    /// <summary>
+    /// Разбирает DeviceID устройства вывода Windows:
+    /// \\?\DISPLAY#AUS27FE#5&amp;16ebb415&amp;0&amp;UID4353#{guid}
+    /// → [DISPLAY, AUS27FE, 5&amp;16ebb415&amp;0&amp;UID4353, {guid}].
+    /// </summary>
+    private static string[] SplitDeviceId(string? monitorDeviceId)
+    {
+        string id = monitorDeviceId ?? "";
+        if (id.StartsWith(@"\\?\", StringComparison.Ordinal)) id = id[4..];
+        return id.Split('#');
+    }
+
+    /// <summary>
+    /// Читает EDID монитора из реестра Windows: имя (дескриптор 0xFC) и
+    /// серийный номер (0xFF). Путь собирается из DeviceID устройства вывода.
+    /// </summary>
+    private static EdidInfo? ReadEdid(string monitorDeviceId)
+    {
+        try
+        {
+            string[] parts = SplitDeviceId(monitorDeviceId);
+            if (parts.Length < 3 ||
+                !parts[0].Equals("DISPLAY", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            string path = $"SYSTEM\\CurrentControlSet\\Enum\\DISPLAY\\{parts[1]}\\{parts[2]}\\Device Parameters";
+            using var key = Registry.LocalMachine.OpenSubKey(path);
+            if (key?.GetValue("EDID") is not byte[] edid || edid.Length < 126) return null;
+
+            string name = EdidDescriptor(edid, 0xFC);
+            string serial = EdidDescriptor(edid, 0xFF);
+            if (serial is "0" or "") serial = "";
+            return new EdidInfo(name, serial);
+        }
+        catch
+        {
+            // Доступ к реестру может быть закрыт — не ломаем список мониторов.
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Ищет текстовый дескриптор нужного типа (0xFC — имя, 0xFF — серийник).
+    /// Раскладка по данным EDID: 00 00 00 TAG 00 и далее 13 байт текста.
+    /// </summary>
+    private static string EdidDescriptor(byte[] edid, byte tag)
+    {
+        int end = Math.Min(edid.Length, 126);
+        for (int offset = 54; offset + 18 <= end; offset += 18)
+        {
+            if (edid[offset] != 0 || edid[offset + 1] != 0 ||
+                edid[offset + 2] != 0 || edid[offset + 3] != tag)
+                continue;
+
+            var text = new StringBuilder();
+            for (int i = 5; i < 18; i++)
+            {
+                char c = (char)edid[offset + i];
+                if (c is '\n' or '\r') break;
+                if (c < 32 || c > 126) continue;
+                text.Append(c);
+            }
+            return text.ToString().Trim();
+        }
+        return "";
     }
 
     public static MonitorChoice? FindByDeviceName(IEnumerable<MonitorChoice> monitors, string? deviceName)
