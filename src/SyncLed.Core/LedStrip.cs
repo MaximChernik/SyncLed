@@ -71,6 +71,13 @@ public sealed class LedStrip : ILedStrip
     private long _statBytes;
     private long _statErrors;
 
+    /// <summary>Журнал приложения: подключает движок для точных замеров записи.</summary>
+    public event Action<string>? Log;
+
+    // Для замера задержки «клик по цвету → запись в контроллер».
+    private long _staticQueuedTicks;
+    private Rgb? _lastLoggedStatic;
+
     public string Path { get; }
     public ushort Vid { get; }
     public ushort Pid { get; }
@@ -437,7 +444,24 @@ public sealed class LedStrip : ILedStrip
         if (n < 254) parts.Add((n + 1, Rgb.Black, 254));
 
         byte[] packet = BuildSectionPacket(NextId(), parts);
-        SendSignedInternal(packet, parts, repeatAfterMs: 3000, isSync: false);
+        bool written = SendSignedInternal(packet, parts, repeatAfterMs: 3000, isSync: false);
+
+        // Одна строка журнала на каждую смену цвета: сколько прошло от постановки
+        // в очередь до записи в контроллер. По ней видно, где копится задержка —
+        // в приложении или в самом контроллере.
+        if (written && color != _lastLoggedStatic)
+        {
+            _lastLoggedStatic = color;
+            long ms = Math.Max(0, Environment.TickCount64 - _staticQueuedTicks);
+            try
+            {
+                Log?.Invoke($"{Title}: статический цвет записан через {ms} мс");
+            }
+            catch
+            {
+                // Журнал не должен ломать отправку.
+            }
+        }
     }
 
     private void ExecuteSendOff()
@@ -471,15 +495,16 @@ public sealed class LedStrip : ILedStrip
         SendSignedInternal(packet, records, repeatAfterMs: 2000, isSync: true);
     }
 
-    /// <summary>Внутренняя реализация отправки, предназначенная для вызова из WriterLoop.</summary>
-    private void SendSignedInternal(byte[] packet, List<(int Start, Rgb Color, int End)> signature,
+    /// <summary>Внутренняя реализация отправки, предназначенная для вызова из WriterLoop.
+    /// true — пакет реально ушёл в контроллер.</summary>
+    private bool SendSignedInternal(byte[] packet, List<(int Start, Rgb Color, int End)> signature,
         int repeatAfterMs, bool isSync, bool bypassRateLimit = false)
     {
         long now = Environment.TickCount64;
         if (!bypassRateLimit && _lastRecords != null && _lastSendTicks != 0
             && now - _lastSendTicks < repeatAfterMs
             && SameRecords(_lastRecords, signature))
-            return;
+            return false;
 
         if (!bypassRateLimit && now < _nextSendTicks)
         {
@@ -487,9 +512,9 @@ public sealed class LedStrip : ILedStrip
             // коалесцирует новые цвета. Короткое ожидание убирает мерцание
             // из-за периодических пропусков на границе интервала.
             int wait = (int)Math.Min(250, _nextSendTicks - now);
-            if (wait <= 0) return;
+            if (wait <= 0) return false;
             Thread.Sleep(wait);
-            if (_writerStop) return;
+            if (_writerStop) return false;
             now = Environment.TickCount64;
         }
 
@@ -503,7 +528,9 @@ public sealed class LedStrip : ILedStrip
             _lastRecords = signature;
             _lastSendTicks = now;
             _nextSendTicks = bypassRateLimit ? now : now + MinIntervalMs(packet.Length, isSync);
+            return true;
         }
+        return false;
     }
 
     public void SendSegment(int start, int end, Rgb color)
@@ -522,6 +549,7 @@ public sealed class LedStrip : ILedStrip
         {
             _nextAction = ActionType.Static;
             _nextStaticColor = color;
+            _staticQueuedTicks = Environment.TickCount64;
             _signal.Set();
         }
     }

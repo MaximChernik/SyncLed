@@ -102,6 +102,12 @@ public sealed class SyncEngine : IDisposable
                 ble.Log -= EmitLog;
                 ble.Log += EmitLog;
             }
+            if (strip is LedStrip usb)
+            {
+                // Замер задержки «клик по цвету → запись в контроллер».
+                usb.Log -= EmitLog;
+                usb.Log += EmitLog;
+            }
 
             _runtimes.Add(new Runtime
             {
